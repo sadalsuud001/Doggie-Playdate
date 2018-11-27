@@ -88,6 +88,14 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         LocationListener,
         com.google.android.gms.location.LocationListener
 {
+
+    //message part variables init
+    Button btnMessage, btncreatePlaydate;
+    final private String testUid = "MyvsPO4Zj7YvQxQaL4jqyBjnX7I2";
+    private String target_id = "34";
+
+
+
     private GoogleMap mMap;
     //Play Services
     private static final int MY_PERMISSION_REQUEST_CODE = 7000;
@@ -212,7 +220,25 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_nav_drawer);
+        setContentView(R.layout.activity_welcome);
+
+
+        // Set up message onClick listener.
+        btnMessage = (Button) findViewById(R.id.btnMessage);
+        btnMessage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(Welcome.this, message.class);
+                //TODO: user id should be passed in from main activity.
+                intent.putExtra("user_id", "12");
+                //TODO: if target_id==null, will not allow user to enter message activity
+                intent.putExtra("target_id", target_id);
+                startActivity(intent);
+            }
+        });
+
+
 
         toolbar = findViewById(R.id.toolbar);
         drawer = findViewById(R.id.drawer_layout);

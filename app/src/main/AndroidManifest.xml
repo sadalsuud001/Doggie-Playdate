@@ -48,6 +48,7 @@
         <activity
             android:name=".google_maps_api"
             android:label="@string/title_activity_google_maps_api" />
+        <activity android:name=".message"/>
         <activity android:name=".HomeActivity" />
      <!--   <activity android:name=".Fragments.NonMapActivity"></activity> -->
     </application>

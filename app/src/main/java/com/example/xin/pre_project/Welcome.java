@@ -379,13 +379,13 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                         switch (menuItem.getItemId()) {
                             case R.id.navI_home:
-                                //navigationView.getMenu().getItem(navItemIndex).setChecked(false);
+                                navigationView.getMenu().getItem(navItemIndex).setChecked(false);
                                 navItemIndex = 0;
                                 selectNavMenu(navItemIndex);
                                 CURRENT_TAG = TAG_HOME;
                                 break;
                             case R.id.navI_messaging:
-                                //navigationView.getMenu().getItem(navItemIndex).setChecked(false);
+                                navigationView.getMenu().getItem(navItemIndex).setChecked(false);
                                 navItemIndex = 1;
                                 selectNavMenu(navItemIndex);
                                 Intent go0 = new Intent(Welcome.this, HomeActivity.class);
@@ -393,7 +393,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 startActivityForResult(go0, 0);
                                 break;
                             case R.id.navI_makeplaydate:
-                                //navigationView.getMenu().getItem(navItemIndex).setChecked(false);
+                                navigationView.getMenu().getItem(navItemIndex).setChecked(false);
                                 navItemIndex = 2;
                                 selectNavMenu(navItemIndex);
                                 Intent go1 = new Intent(Welcome.this, HomeActivity.class);
@@ -401,7 +401,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 startActivityForResult(go1, 0);
                                 break;
                             case R.id.navI_playdates:
-                                //navigationView.getMenu().getItem(navItemIndex).setChecked(false);
+                                navigationView.getMenu().getItem(navItemIndex).setChecked(false);
                                 navItemIndex = 3;
                                 selectNavMenu(navItemIndex);
                                 Intent go2 = new Intent(Welcome.this, HomeActivity.class);
@@ -409,7 +409,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 startActivityForResult(go2, 0);
                                 break;
                             case R.id.navI_userprofile:
-                                //navigationView.getMenu().getItem(navItemIndex).setChecked(false);
+                                navigationView.getMenu().getItem(navItemIndex).setChecked(false);
                                 navItemIndex = 4;
                                 selectNavMenu(navItemIndex);
                                 Intent go = new Intent(Welcome.this, HomeActivity.class);
@@ -417,7 +417,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 startActivityForResult(go, 0);
                                 break;
                             case R.id.navI_settings:
-                                //navigationView.getMenu().getItem(navItemIndex).setChecked(false);
+                                navigationView.getMenu().getItem(navItemIndex).setChecked(false);
                                 navItemIndex = 5;
                                 selectNavMenu(navItemIndex);
                                 Intent go3 = new Intent(Welcome.this, HomeActivity.class);

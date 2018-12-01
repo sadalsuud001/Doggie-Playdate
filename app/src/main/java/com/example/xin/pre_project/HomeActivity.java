@@ -58,15 +58,13 @@ public class HomeActivity extends AppCompatActivity
         drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
 
-
-        //if(drawer != null)
         setUpNavigationView();
 
         b = getIntent().getExtras();
+        getIntent().removeExtra("navItemIndex");
 
         if(savedInstanceState != null) {
-            Log.d("HomeActivity", "ON CREATE savedInstanceState != null");
-            navItemIndex = savedInstanceState.getInt("navItemIndex", 0);
+            navItemIndex = savedInstanceState.getInt("saveIndex", 0);
             switch(navItemIndex) {
                 case 1:
                     CURRENT_TAG = TAG_MESSAGING;
@@ -128,7 +126,6 @@ public class HomeActivity extends AppCompatActivity
         }
         else if(b != null) {
             navItemIndex = b.getInt("navItemIndex", 1);
-            Log.d("HomeActivity", "ONCREATE bundle != null  index = " + navItemIndex);
             switch (navItemIndex) {
                 case 1:
                     CURRENT_TAG = TAG_MESSAGING;
@@ -197,7 +194,7 @@ public class HomeActivity extends AppCompatActivity
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("navItemIndex", navItemIndex);
+        outState.putInt("saveIndex", navItemIndex);
         //outState.putString("CURRENT_TAG", CURRENT_TAG);
     }
 
@@ -222,7 +219,7 @@ public class HomeActivity extends AppCompatActivity
                                 selectNavMenu(navItemIndex);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                                 if(fragment == null)
-                                    fragment = new ProfileFragment();
+                                    fragment = new MessagingFragment();
                                 navToFragment(fragment);
                                 break;
                             case R.id.navI_makeplaydate:
@@ -249,7 +246,7 @@ public class HomeActivity extends AppCompatActivity
                                 selectNavMenu(navItemIndex);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                                 if(fragment == null)
-                                    fragment = new AccountSettingsFragment();
+                                    fragment = new ProfileFragment();
                                 navToFragment(fragment);
                                 break;
                             case R.id.navI_settings:

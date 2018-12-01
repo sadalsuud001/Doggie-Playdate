@@ -23,8 +23,12 @@ import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import com.example.xin.firex.ImageManager;
-import com.example.xin.firex.R;
+import com.example.xin.pre_project.Dog;
+import com.example.xin.pre_project.ImageManager;
+import com.example.xin.pre_project.R;
+import com.example.xin.pre_project.SQLiteManager;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -37,7 +41,6 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
     // Birthday Date Picker
     EditText chooseBirthday;
     DatePickerDialog picker;
-    int month, day, year;
 
     // RadioButtons
     RadioGroup radioGender, radioSize;
@@ -46,13 +49,17 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
 
     // Dog Pic
     ImageView dogPic;
-    private String mCurrentPhotoPath;
+    String picPath, dogName;
+  
     private static final int CAMERA_REQUEST = 1888;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
     private static final int GALLERY_REQUEST = 1999;
 
+    String name, breed;
+    int gender, year, month, day;
+
+    Button addDog;
     Button savePic, loadPic;
-    String picPath, dogName;
 
     public AddDogFragment() {
         // Required empty public constructor
@@ -140,17 +147,6 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                /* asking for camera permissions - PERMISSION IS ALWAYS DENIED
-                                if (ContextCompat.checkSelfPermission(AddDogActivity.this, Manifest.permission.CAMERA)
-                                        != PackageManager.PERMISSION_GRANTED) {
-                                    ActivityCompat.requestPermissions(AddDogActivity.this,
-                                            new String[]{Manifest.permission.CAMERA},
-                                            MY_CAMERA_PERMISSION_CODE);
-                                } else {
-                                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
-                                }
-                                */
                                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                 startActivityForResult(cameraIntent, CAMERA_REQUEST);
                             }
@@ -165,6 +161,45 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
                 alertDialog.show();
             }
         });
+
+        addDog = view.findViewById(R.id.addDogButton);
+        addDog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                name = addDogEditName.getText().toString();
+                breed = addDogBreed.getText().toString();
+                if(name.isEmpty() || breed.isEmpty()) {
+                    Toast t2 = Toast.makeText(getContext(), "You must fill out all fields", Toast.LENGTH_SHORT);
+                    t2.setGravity(Gravity.CENTER, 0,0);
+                    t2.show();
+                }
+                else {
+                    Dog newDog = new Dog(name, breed, genderSelectedRadioId, sizeSelectedRadioId, year, month, day);
+                    SQLiteManager db = new SQLiteManager(getContext());
+
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    if(user != null) {
+                        String uid = user.getUid();
+                        String email = user.getEmail();
+                        String userName = user.getDisplayName();
+
+                        switch((int)db.addDog(userName, newDog)) {
+                            case -1: Toast t = Toast.makeText(getContext(), "Error adding " + name + " to Dogs List", Toast.LENGTH_SHORT);
+                                t.setGravity(Gravity.CENTER, 0,0);
+                                t.show();
+                                break;
+                            default: Toast t1 = Toast.makeText(getContext(), "Added " + name + " to Dogs List", Toast.LENGTH_SHORT);
+                                t1.setGravity(Gravity.CENTER, 0,0);
+                                t1.show();
+                                break;
+                        }
+                    }
+                }
+
+            }
+        });
+
         savePic = view.findViewById(R.id.savePic);
         loadPic = view.findViewById(R.id.loadPic);
 
@@ -228,6 +263,13 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
         if(requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             photo = (Bitmap) data.getExtras().get("data");
             dogPic.setImageBitmap(photo);
+
+            // save dog photo to local storage
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) dogPic.getDrawable();
+            Bitmap bitmap = bitmapDrawable.getBitmap();
+            ImageManager im = new ImageManager(getContext());
+            picPath = im.saveToInternalStorage(bitmap, dogName);
+            dogPic.setImageDrawable(null);
         }
 
         if(requestCode == GALLERY_REQUEST && resultCode == Activity.RESULT_OK) {
@@ -235,6 +277,14 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
             try {
                 photo = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
                 dogPic.setImageBitmap(photo);
+
+              // save dog photo to local storage
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) dogPic.getDrawable();
+                Bitmap bitmap = bitmapDrawable.getBitmap();
+                ImageManager im = new ImageManager(getContext());
+                picPath = im.saveToInternalStorage(bitmap, dogName);
+                dogPic.setImageDrawable(null);
+              
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

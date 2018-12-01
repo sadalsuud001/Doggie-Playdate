@@ -24,8 +24,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.xin.firex.ImageManager;
-import com.example.xin.firex.R;
+import com.example.xin.pre_project.ImageManager;
+import com.example.xin.pre_project.R;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

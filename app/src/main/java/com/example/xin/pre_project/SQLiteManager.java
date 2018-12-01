@@ -13,9 +13,19 @@ public class SQLiteManager extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "DoggiePlaydate";
     private static final int DATABASE_VERSION = 1;
     private static int playdateCount = 0;
+    private Context myContext;
+    private String userName;
 
-    public SQLiteManager (Context context) {
+    public SQLiteManager(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.myContext = context;
+        this.userName = "andrew";
+    }
+
+    public SQLiteManager (Context context, String userName) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.myContext = context;
+        this.userName = userName;
     }
 
     @Override
@@ -27,11 +37,25 @@ public class SQLiteManager extends SQLiteOpenHelper {
                 "longitude real)";
 
         db.execSQL(sql);
+
+        // create dogs table
+        sql = "CREATE TABLE IF NOT EXISTS " + userName + "_Dogs(" +
+                "name text primary key, " +
+                "breed text, " +
+                "gender integer, " +
+                "size integer, " +
+                "year integer, " +
+                "month integer, " +
+                "day integer)";
+        db.execSQL(sql);
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int v1, int v2) {
         String sql = "DROP TABLE IF EXISTS Playdates;";
+        db.execSQL(sql);
+        sql = "DROP TABLE IF EXISTS " + userName + "_Dogs;";
         db.execSQL(sql);
         onCreate(db);
     }
@@ -122,5 +146,33 @@ public class SQLiteManager extends SQLiteOpenHelper {
         }
 
         return null;
+    }
+
+    public long addDog(String userName, Dog newDog) {
+        ContentValues cv1 = new ContentValues();
+        cv1.put("name", newDog.name);
+        cv1.put("breed", newDog.breed);
+        cv1.put("gender", newDog.gender);
+        cv1.put("size", newDog.size);
+        cv1.put("year", newDog.bdayYear);
+        cv1.put("month", newDog.bdayMonth);
+        cv1.put("day", newDog.bdayDay);
+
+        SQLiteDatabase db = getWritableDatabase();
+        return db.insert(userName + "_Dogs", null, cv1);
+    }
+
+    public void removeDog(String userName, String dogName) {
+        SQLiteDatabase db = getWritableDatabase();
+        switch(db.delete(userName + "_Dogs", "name=" + dogName, null)) {
+            case 0: Toast t = Toast.makeText(myContext, "Error: dog not found", Toast.LENGTH_SHORT);
+                t.setGravity(Gravity.CENTER, 0 ,0);
+                t.show();
+                break;
+            default: Toast t1 = Toast.makeText(myContext, dogName + " removed from Your Dogs", Toast.LENGTH_SHORT);
+                t1.setGravity(Gravity.CENTER, 0 ,0);
+                t1.show();
+                break;
+        }
     }
 }

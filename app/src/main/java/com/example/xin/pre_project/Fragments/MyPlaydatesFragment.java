@@ -13,10 +13,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.example.xin.firex.Playdate;
-import com.example.xin.firex.PlaydatesAdapter;
-import com.example.xin.firex.R;
-import com.example.xin.firex.SQLiteManager;
+import com.example.xin.pre_project.Playdate;
+import com.example.xin.pre_project.PlaydatesAdapter;
+import com.example.xin.pre_project.R;
+import com.example.xin.pre_project.SQLiteManager;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

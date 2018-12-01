@@ -26,10 +26,13 @@
         android:layout_height="match_parent"
         app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
 
-        <RelativeLayout
-            android:id="@+id/relativeLayout"
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:id="@+id/layout_panel"
@@ -45,6 +48,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />-->
 
+
                 <fragment
                     android:id="@+id/place_autocomplete_fragment"
                     android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
@@ -52,6 +56,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
                     android:layout_weight="5"/>
+
 
 
 
@@ -66,23 +71,48 @@
 
 
             <fragment
-                android:layout_below="@+id/layout_panel"
                 android:id="@+id/map"
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context=".Welcome"/>
+                android:layout_height="415dp"
+                android:layout_below="@+id/layout_panel"
+                tools:context=".Welcome" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal"
+                android:layout_alignParentLeft="true">
+
+                <Button
+                    android:id="@+id/btnMessage"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="6dp"
+                    android:layout_weight="1"
+                    android:text="Message" />
+
+                <Button
+                    android:id="@+id/btnRegister"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="6dp"
+                    android:layout_weight="1"
+                    android:onClick="onClick"
+                    android:text="Create Playdate" />
+
+            </LinearLayout>
 
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                >
+                android:layout_alignParentBottom="true">
                 <LinearLayout
                     android:orientation="horizontal"
                     android:weightSum="10"
-                    android:layout_margin="16dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
@@ -114,10 +144,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
 
+
+
+
+
                 </LinearLayout>
 
             </android.support.v7.widget.CardView>
-        </RelativeLayout>
+        </LinearLayout>
 
     </FrameLayout>
 

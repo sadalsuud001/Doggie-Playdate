@@ -5,11 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.xin.firex.R;
+import com.example.xin.pre_project.R;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
-
-import org.w3c.dom.Text;
 
 public class CustomInfoWindow implements GoogleMap.InfoWindowAdapter {
 

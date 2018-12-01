@@ -3,6 +3,7 @@ package com.example.xin.pre_project;
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -207,6 +208,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     public static int navItemIndex = 0;
 
     private static final String TAG_HOME = "home";
+    private static final String TAG_MESSAGING = "messaging";
     private static final String TAG_CREATEPLAYDATE = "createplaydate";
     private static final String TAG_PROFILE = "profile";
     private static final String TAG_MYPLAYDATES = "myplaydates";
@@ -220,7 +222,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_welcome);
+        setContentView(R.layout.activity_welcome_nav_drawer);
+
 
 
         // Set up message onClick listener.
@@ -382,37 +385,45 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 selectNavMenu(navItemIndex);
                                 CURRENT_TAG = TAG_HOME;
                                 break;
-                            case R.id.navI_userprofile:
+                            case R.id.navI_messaging:
                                 navigationView.getMenu().getItem(navItemIndex).setChecked(false);
                                 navItemIndex = 1;
                                 selectNavMenu(navItemIndex);
-                                Intent go = new Intent(Welcome.this, HomeActivity.class);
-                                go.putExtra("index", 1);
-                                startActivity(go);
+                                Intent go0 = new Intent(Welcome.this, HomeActivity.class);
+                                go0.putExtra("navItemIndex", 1);
+                                startActivityForResult(go0, 0);
                                 break;
                             case R.id.navI_makeplaydate:
                                 navigationView.getMenu().getItem(navItemIndex).setChecked(false);
                                 navItemIndex = 2;
                                 selectNavMenu(navItemIndex);
                                 Intent go1 = new Intent(Welcome.this, HomeActivity.class);
-                                go1.putExtra("index", 2);
-                                startActivity(go1);
+                                go1.putExtra("navItemIndex", 2);
+                                startActivityForResult(go1, 0);
                                 break;
                             case R.id.navI_playdates:
                                 navigationView.getMenu().getItem(navItemIndex).setChecked(false);
                                 navItemIndex = 3;
                                 selectNavMenu(navItemIndex);
                                 Intent go2 = new Intent(Welcome.this, HomeActivity.class);
-                                go2.putExtra("index", 3);
-                                startActivity(go2);
+                                go2.putExtra("navItemIndex", 3);
+                                startActivityForResult(go2, 0);
                                 break;
-                            case R.id.navI_settings:
+                            case R.id.navI_userprofile:
                                 navigationView.getMenu().getItem(navItemIndex).setChecked(false);
                                 navItemIndex = 4;
                                 selectNavMenu(navItemIndex);
+                                Intent go = new Intent(Welcome.this, HomeActivity.class);
+                                go.putExtra("navItemIndex", 4);
+                                startActivityForResult(go, 0);
+                                break;
+                            case R.id.navI_settings:
+                                navigationView.getMenu().getItem(navItemIndex).setChecked(false);
+                                navItemIndex = 5;
+                                selectNavMenu(navItemIndex);
                                 Intent go3 = new Intent(Welcome.this, HomeActivity.class);
-                                go3.putExtra("index", 4);
-                                startActivity(go3);
+                                go3.putExtra("navItemIndex", 5);
+                                startActivityForResult(go3, 0);
                                 break;
                             case R.id.action_logout:
                                 /*
@@ -421,11 +432,12 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 // GO TO LOGIN SCREEN
                                 Toast.makeText(getApplicationContext(), "Log out user", Toast.LENGTH_SHORT).show();
                                 navigationView.getMenu().getItem(navItemIndex).setChecked(false);
-                                navItemIndex = 5;
+                                
+                                navItemIndex = 6;
                                 selectNavMenu(navItemIndex);
                                 Intent go4 = new Intent(Welcome.this, HomeActivity.class);
-                                go4.putExtra("index", 5);
-                                startActivity(go4);
+                                go4.putExtra("navItemIndex", 6);
+                                startActivityForResult(go4, 0);
                                 break;
                             default:
                                 navItemIndex = 0;
@@ -455,6 +467,21 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
             actionBarDrawerToggle.syncState();
         }
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 0) {
+            if(resultCode == Activity.RESULT_OK){
+                navItemIndex = data.getIntExtra("navItemIndex", 0);
+                selectNavMenu(navItemIndex);
+                CURRENT_TAG = TAG_HOME;
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Write your code if there's no result
+            }
+        }
     }
 
     // TODO

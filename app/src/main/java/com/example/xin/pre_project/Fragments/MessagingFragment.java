@@ -10,11 +10,11 @@ import android.widget.TextView;
 
 import com.example.xin.pre_project.R;
 
-public class ProfileFragment extends Fragment {
+public class MessagingFragment extends Fragment {
 
     TextView tv;
 
-    public ProfileFragment() {
+    public MessagingFragment() {
         // Required empty public constructor
     }
 
@@ -29,7 +29,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        View view = inflater.inflate(R.layout.fragment_messaging, container, false);
         bindViews(view);
 
         return view;

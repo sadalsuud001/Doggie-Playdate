@@ -38,6 +38,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -47,7 +48,9 @@ public class message extends AppCompatActivity
         implements GoogleApiClient.OnConnectionFailedListener {
     // Firebase instance variables
     private DatabaseReference mFirebaseDatabaseReference;
+    
     private DatabaseReference mFirebaseChatDataRef;
+
     private FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>
             mFirebaseAdapter;
 
@@ -119,6 +122,7 @@ public class message extends AppCompatActivity
         // Construct child name.
         String target_id = getIntent().getStringExtra("target_id");
         String user_id = getIntent().getStringExtra("user_id");
+
 
         if (target_id.compareTo(user_id) < 0) MESSAGES_CHILD = target_id + ":" + user_id;
         else MESSAGES_CHILD = user_id+":"+target_id;
@@ -267,7 +271,6 @@ public class message extends AppCompatActivity
 
     @Override
     public void onStart() {
-        super.onStart();
     }
 
     @Override

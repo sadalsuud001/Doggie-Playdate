@@ -1,5 +1,7 @@
 package com.example.xin.pre_project;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 import com.example.xin.pre_project.Fragments.AccountSettingsFragment;
 import com.example.xin.pre_project.Fragments.AddDogFragment;
 import com.example.xin.pre_project.Fragments.CreatePlaydateFragment;
+import com.example.xin.pre_project.Fragments.MessagingFragment;
 import com.example.xin.pre_project.Fragments.MyPlaydatesFragment;
 import com.example.xin.pre_project.Fragments.ProfileFragment;
 
@@ -32,15 +35,16 @@ public class HomeActivity extends AppCompatActivity
     private DrawerLayout drawer;
     private Toolbar toolbar;
 
+    private Bundle b;
     public static int navItemIndex = 0;
 
     private static final String TAG_HOME = "home";
+    private static final String TAG_MESSAGING = "messaging";
     private static final String TAG_CREATEPLAYDATE = "createplaydate";
     private static final String TAG_PROFILE = "profile";
     private static final String TAG_MYPLAYDATES = "myplaydates";
     private static final String TAG_ACCOUNTSETTINGS = "accountsettings";
     private static final String TAG_ADDDOG = "adddog";
-    private static final String TAG_SCHEDULEPLAYDATE = "scheduleplaydate";
 
     private Fragment fragment;
     public static String CURRENT_TAG = TAG_HOME;
@@ -48,111 +52,134 @@ public class HomeActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_nav_drawer_homeactivity);
+        setContentView(R.layout.activity_home_nav_drawer);
 
         toolbar = findViewById(R.id.toolbar);
         drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
 
-
-        //if(drawer != null)
         setUpNavigationView();
 
-        Bundle b = getIntent().getExtras();
-        if (b  != null) {
+        b = getIntent().getExtras();
+        getIntent().removeExtra("navItemIndex");
 
-            navItemIndex = b.getInt("index", 0);
-            Log.d("HomeActivity", "ONCREATE bundle != null  index = " + navItemIndex);
+        if(savedInstanceState != null) {
+            navItemIndex = savedInstanceState.getInt("saveIndex", 0);
             switch(navItemIndex) {
-                case 1: CURRENT_TAG = TAG_PROFILE;
+                case 1:
+                    CURRENT_TAG = TAG_MESSAGING;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
-                        fragment = new ProfileFragment();
+                    if (fragment == null)
+                        fragment = new MessagingFragment();
                     navToFragment(fragment);
                     break;
-                case 2: CURRENT_TAG = TAG_CREATEPLAYDATE;
+                case 2:
+                    CURRENT_TAG = TAG_CREATEPLAYDATE;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
+                    if (fragment == null)
                         fragment = new CreatePlaydateFragment();
                     navToFragment(fragment);
                     break;
-                case 3: CURRENT_TAG = TAG_MYPLAYDATES;
+                case 3:
+                    CURRENT_TAG = TAG_MYPLAYDATES;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
+                    if (fragment == null)
                         fragment = new MyPlaydatesFragment();
                     navToFragment(fragment);
                     break;
-                case 4: CURRENT_TAG = TAG_ACCOUNTSETTINGS;
+                case 4:
+                    CURRENT_TAG = TAG_PROFILE;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
+                    if (fragment == null)
+                        fragment = new ProfileFragment();
+                    navToFragment(fragment);
+                    break;
+                case 5:
+                    CURRENT_TAG = TAG_ACCOUNTSETTINGS;
+                    selectNavMenu(navItemIndex);
+                    fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
+                    if (fragment == null)
                         fragment = new AccountSettingsFragment();
                     navToFragment(fragment);
                     break;
-                case 5: CURRENT_TAG = TAG_ADDDOG;
+                case 6:
+                    CURRENT_TAG = TAG_ADDDOG;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
+                    if (fragment == null)
                         fragment = new AddDogFragment();
                     navToFragment(fragment);
                     break;
-                default: CURRENT_TAG = TAG_MYPLAYDATES;
+                default:
+                    CURRENT_TAG = TAG_MYPLAYDATES;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
+                    if (fragment == null)
                         fragment = new MyPlaydatesFragment();
                     navToFragment(fragment);
             }
 
         }
-        else if(savedInstanceState != null) {
-            Log.d("HomeActivity", "ON CREATE savedInstanceState != null");
-            navItemIndex = savedInstanceState.getInt("navItemIndex", 0);
-            switch(navItemIndex) {
-                case 1: CURRENT_TAG = TAG_PROFILE;
+        else if(b != null) {
+            navItemIndex = b.getInt("navItemIndex", 1);
+            switch (navItemIndex) {
+                case 1:
+                    CURRENT_TAG = TAG_MESSAGING;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
-                        fragment = new ProfileFragment();
+                    if (fragment == null)
+                        fragment = new MessagingFragment();
                     navToFragment(fragment);
                     break;
-                case 2: CURRENT_TAG = TAG_CREATEPLAYDATE;
+                case 2:
+                    CURRENT_TAG = TAG_CREATEPLAYDATE;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
+                    if (fragment == null)
                         fragment = new CreatePlaydateFragment();
                     navToFragment(fragment);
                     break;
-                case 3: CURRENT_TAG = TAG_MYPLAYDATES;
+                case 3:
+                    CURRENT_TAG = TAG_MYPLAYDATES;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
+                    if (fragment == null)
                         fragment = new MyPlaydatesFragment();
                     navToFragment(fragment);
                     break;
-                case 4: CURRENT_TAG = TAG_ACCOUNTSETTINGS;
+                case 4:
+                    CURRENT_TAG = TAG_PROFILE;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
+                    if (fragment == null)
+                        fragment = new ProfileFragment();
+                    navToFragment(fragment);
+                    break;
+                case 5:
+                    CURRENT_TAG = TAG_ACCOUNTSETTINGS;
+                    selectNavMenu(navItemIndex);
+                    fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
+                    if (fragment == null)
                         fragment = new AccountSettingsFragment();
                     navToFragment(fragment);
                     break;
-                case 5: CURRENT_TAG = TAG_ADDDOG;
+                case 6:
+                    CURRENT_TAG = TAG_ADDDOG;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
+                    if (fragment == null)
                         fragment = new AddDogFragment();
                     navToFragment(fragment);
                     break;
-                default: CURRENT_TAG = TAG_MYPLAYDATES;
+                default:
+                    CURRENT_TAG = TAG_MYPLAYDATES;
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if(fragment == null)
-                        fragment = new MyPlaydatesFragment();
-                    navToFragment(fragment);
+                    if (fragment == null)
             }
         }
         else {
@@ -165,7 +192,7 @@ public class HomeActivity extends AppCompatActivity
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("navItemIndex", navItemIndex);
+        outState.putInt("saveIndex", navItemIndex);
         //outState.putString("CURRENT_TAG", CURRENT_TAG);
     }
 
@@ -179,17 +206,19 @@ public class HomeActivity extends AppCompatActivity
                             case R.id.navI_home:
                                 navItemIndex = 0;
                                 selectNavMenu(navItemIndex);
-                                //CURRENT_TAG = TAG_HOME;
-                                // go back to Welcome Activity
+
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra("navItemIndex", navItemIndex);
+                                setResult(Activity.RESULT_OK, returnIntent);
                                 finish();
                                 break;
-                            case R.id.navI_userprofile:
+                            case R.id.navI_messaging:
                                 navItemIndex = 1;
-                                CURRENT_TAG = TAG_PROFILE;
+                                CURRENT_TAG = TAG_MESSAGING;
                                 selectNavMenu(navItemIndex);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                                 if(fragment == null)
-                                    fragment = new ProfileFragment();
+                                    fragment = new MessagingFragment();
                                 navToFragment(fragment);
                                 break;
                             case R.id.navI_makeplaydate:
@@ -210,8 +239,17 @@ public class HomeActivity extends AppCompatActivity
                                     fragment = new MyPlaydatesFragment();
                                 navToFragment(fragment);
                                 break;
-                            case R.id.navI_settings:
+                            case R.id.navI_userprofile:
                                 navItemIndex = 4;
+                                CURRENT_TAG = TAG_PROFILE;
+                                selectNavMenu(navItemIndex);
+                                fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
+                                if(fragment == null)
+                                    fragment = new ProfileFragment();
+                                navToFragment(fragment);
+                                break;
+                            case R.id.navI_settings:
+                                navItemIndex = 5;
                                 CURRENT_TAG = TAG_ACCOUNTSETTINGS;
                                 selectNavMenu(navItemIndex);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
@@ -225,7 +263,8 @@ public class HomeActivity extends AppCompatActivity
                                 */
                                 // GO TO LOGIN SCREEN
                                 Toast.makeText(getApplicationContext(), "Log out user", Toast.LENGTH_SHORT).show();
-                                navItemIndex = 5;
+                                navItemIndex = 6;
+
                                 CURRENT_TAG = TAG_ADDDOG;
                                 selectNavMenu(navItemIndex);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);

@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.glomadrian:MaterialAnimatedSwitch-1.1">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/MaterialAnimatedSwitch-1.1.aar/1442ba4ba20dca9fe53c7cf802c68abb/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/MaterialAnimatedSwitch-1.1.aar/1442ba4ba20dca9fe53c7cf802c68abb/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/MaterialAnimatedSwitch-1.1.aar/9ce53ef7fa58fcf6cd160f3b03e8ac0a/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/MaterialAnimatedSwitch-1.1.aar/9ce53ef7fa58fcf6cd160f3b03e8ac0a/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

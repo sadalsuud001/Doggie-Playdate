@@ -180,6 +180,9 @@ public class HomeActivity extends AppCompatActivity
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
+                        fragment = new MyPlaydatesFragment();
+                    navToFragment(fragment);
+                    break;
             }
         }
         else {

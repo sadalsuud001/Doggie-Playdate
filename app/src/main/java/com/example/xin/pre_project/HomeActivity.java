@@ -37,7 +37,7 @@ public class HomeActivity extends AppCompatActivity
     private DrawerLayout drawer;
     private Toolbar toolbar;
 
-    private TextView hamburgerMessageMarker;
+    private TextView hamburgerMessageMarker, toolbarTitle;
     private ImageView navBarMessageMarker;
 
     private Bundle b;
@@ -63,6 +63,8 @@ public class HomeActivity extends AppCompatActivity
         drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
 
+        toolbarTitle = findViewById(R.id.toolbar_title);
+
         navBarMessageMarker = (ImageView) navigationView.getMenu().findItem(R.id.navI_messaging).getActionView();
         hamburgerMessageMarker = (TextView) findViewById(R.id.hamburger_marker);
 
@@ -82,6 +84,7 @@ public class HomeActivity extends AppCompatActivity
                 case 1:
                     CURRENT_TAG = TAG_MESSAGING;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(1);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new MessagingFragment();
@@ -90,6 +93,7 @@ public class HomeActivity extends AppCompatActivity
                 case 2:
                     CURRENT_TAG = TAG_CREATEPLAYDATE;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(2);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new CreatePlaydateFragment();
@@ -98,6 +102,7 @@ public class HomeActivity extends AppCompatActivity
                 case 3:
                     CURRENT_TAG = TAG_MYPLAYDATES;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(3);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new MyPlaydatesFragment();
@@ -106,6 +111,7 @@ public class HomeActivity extends AppCompatActivity
                 case 4:
                     CURRENT_TAG = TAG_PROFILE;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(4);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new ProfileFragment();
@@ -114,6 +120,7 @@ public class HomeActivity extends AppCompatActivity
                 case 5:
                     CURRENT_TAG = TAG_ACCOUNTSETTINGS;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(5);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new AccountSettingsFragment();
@@ -122,6 +129,7 @@ public class HomeActivity extends AppCompatActivity
                 case 6:
                     CURRENT_TAG = TAG_ADDDOG;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(6);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new AddDogFragment();
@@ -130,6 +138,7 @@ public class HomeActivity extends AppCompatActivity
                 default:
                     CURRENT_TAG = TAG_MYPLAYDATES;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(3);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new MyPlaydatesFragment();
@@ -143,6 +152,7 @@ public class HomeActivity extends AppCompatActivity
                 case 1:
                     CURRENT_TAG = TAG_MESSAGING;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(1);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new MessagingFragment();
@@ -151,6 +161,7 @@ public class HomeActivity extends AppCompatActivity
                 case 2:
                     CURRENT_TAG = TAG_CREATEPLAYDATE;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(2);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new CreatePlaydateFragment();
@@ -159,6 +170,7 @@ public class HomeActivity extends AppCompatActivity
                 case 3:
                     CURRENT_TAG = TAG_MYPLAYDATES;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(3);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new MyPlaydatesFragment();
@@ -167,6 +179,7 @@ public class HomeActivity extends AppCompatActivity
                 case 4:
                     CURRENT_TAG = TAG_PROFILE;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(4);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new ProfileFragment();
@@ -175,6 +188,7 @@ public class HomeActivity extends AppCompatActivity
                 case 5:
                     CURRENT_TAG = TAG_ACCOUNTSETTINGS;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(5);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new AccountSettingsFragment();
@@ -183,6 +197,7 @@ public class HomeActivity extends AppCompatActivity
                 case 6:
                     CURRENT_TAG = TAG_ADDDOG;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(6);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new AddDogFragment();
@@ -191,6 +206,7 @@ public class HomeActivity extends AppCompatActivity
                 default:
                     CURRENT_TAG = TAG_MYPLAYDATES;
                     selectNavMenu(navItemIndex);
+                    setToolbarTitle(3);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
                         fragment = new MyPlaydatesFragment();
@@ -232,6 +248,7 @@ public class HomeActivity extends AppCompatActivity
                                 navItemIndex = 1;
                                 CURRENT_TAG = TAG_MESSAGING;
                                 selectNavMenu(navItemIndex);
+                                setToolbarTitle(1);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                                 if(fragment == null)
                                     fragment = new MessagingFragment();
@@ -241,6 +258,7 @@ public class HomeActivity extends AppCompatActivity
                                 navItemIndex = 2;
                                 CURRENT_TAG = TAG_CREATEPLAYDATE;
                                 selectNavMenu(navItemIndex);
+                                setToolbarTitle(2);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                                 if(fragment == null)
                                     fragment = new CreatePlaydateFragment();
@@ -250,6 +268,7 @@ public class HomeActivity extends AppCompatActivity
                                 navItemIndex = 3;
                                 CURRENT_TAG = TAG_MYPLAYDATES;
                                 selectNavMenu(navItemIndex);
+                                setToolbarTitle(3);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                                 if(fragment == null)
                                     fragment = new MyPlaydatesFragment();
@@ -259,6 +278,7 @@ public class HomeActivity extends AppCompatActivity
                                 navItemIndex = 4;
                                 CURRENT_TAG = TAG_PROFILE;
                                 selectNavMenu(navItemIndex);
+                                setToolbarTitle(4);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                                 if(fragment == null)
                                     fragment = new ProfileFragment();
@@ -268,6 +288,7 @@ public class HomeActivity extends AppCompatActivity
                                 navItemIndex = 5;
                                 CURRENT_TAG = TAG_ACCOUNTSETTINGS;
                                 selectNavMenu(navItemIndex);
+                                setToolbarTitle(5);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                                 if(fragment == null)
                                     fragment = new AccountSettingsFragment();
@@ -321,6 +342,19 @@ public class HomeActivity extends AppCompatActivity
         navigationView.getMenu().getItem(navItemIndex).setChecked(true);
         if (drawer != null)
             drawer.closeDrawers();
+    }
+
+    private void setToolbarTitle(int x) {
+        if(toolbarTitle != null) {
+            switch(x) {
+                case 1: toolbarTitle.setText("Messages"); break;
+                case 2: toolbarTitle.setText("Create Playdate"); break;
+                case 3: toolbarTitle.setText("My Playdates"); break;
+                case 4: toolbarTitle.setText("My Profile"); break;
+                case 5: toolbarTitle.setText("Account Settings"); break;
+            }
+        }
+
     }
 
     public void navToFragment(Fragment fragment) {

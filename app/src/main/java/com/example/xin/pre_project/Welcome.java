@@ -256,7 +256,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         /*
             TODO: check for unread messages
          */
-        setUnreadMessages(true);
+        setUnreadMessages(false);
 
         if(drawer != null)
             setUpNavigationView();

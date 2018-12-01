@@ -13,7 +13,7 @@
             android:id="@+id/navI_messaging"
             android:icon="@drawable/ic_messaging"
             android:title="Messages"
-            app:actionViewClass="android.widget.TextView"/>
+            app:actionLayout="@layout/nav_bar_unread_messages"/>
         <item
             android:id="@+id/navI_makeplaydate"
             android:icon="@drawable/ic_schedule"

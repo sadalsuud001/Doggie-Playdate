@@ -31,6 +31,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.xin.pre_project.Common.Common;
@@ -204,6 +205,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     private NavigationView navigationView;
     private DrawerLayout drawer;
     private Toolbar toolbar;
+    private TextView hamburgerMessageMarker;
+    private ImageView navBarMessageMarker;
 
     public static int navItemIndex = 0;
 
@@ -215,9 +218,9 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     private static final String TAG_ACCOUNTSETTINGS = "accountsettings";
     private static final String TAG_ADDDOG = "adddog";
     private static final String TAG_SCHEDULEPLAYDATE = "scheduleplaydate";
-
-    private Fragment fragment;
     public static String CURRENT_TAG = TAG_HOME;
+    private Fragment fragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -246,6 +249,14 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         toolbar = findViewById(R.id.toolbar);
         drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
+
+        navBarMessageMarker = (ImageView) navigationView.getMenu().findItem(R.id.navI_messaging).getActionView();
+        hamburgerMessageMarker = (TextView) findViewById(R.id.hamburger_marker);
+
+        /*
+            TODO: check for unread messages
+         */
+        setUnreadMessages(true);
 
         if(drawer != null)
             setUpNavigationView();
@@ -975,4 +986,20 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     public void onLocationChanged(Location var1)
     {}
 */
+
+    /*
+        TODO: use setUnreadMessage to mark hamburger and navbar for unread messages
+     */
+    void setUnreadMessages(boolean showMarkers) {
+        if(showMarkers) {
+            navBarMessageMarker.setVisibility(View.VISIBLE);
+            if(hamburgerMessageMarker != null)
+                hamburgerMessageMarker.setVisibility(View.VISIBLE);
+        }
+        else {
+            navBarMessageMarker.setVisibility(View.INVISIBLE);
+            if(hamburgerMessageMarker != null)
+                hamburgerMessageMarker.setVisibility(View.INVISIBLE);
+        }
+    }
 }

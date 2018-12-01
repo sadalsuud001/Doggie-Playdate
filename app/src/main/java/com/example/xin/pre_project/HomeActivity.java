@@ -16,6 +16,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.xin.pre_project.Fragments.AccountSettingsFragment;
@@ -34,6 +36,9 @@ public class HomeActivity extends AppCompatActivity
     private NavigationView navigationView;
     private DrawerLayout drawer;
     private Toolbar toolbar;
+
+    private TextView hamburgerMessageMarker;
+    private ImageView navBarMessageMarker;
 
     private Bundle b;
     public static int navItemIndex = 0;
@@ -57,6 +62,14 @@ public class HomeActivity extends AppCompatActivity
         toolbar = findViewById(R.id.toolbar);
         drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
+
+        navBarMessageMarker = (ImageView) navigationView.getMenu().findItem(R.id.navI_messaging).getActionView();
+        hamburgerMessageMarker = (TextView) findViewById(R.id.hamburger_marker);
+
+        /*
+            TODO: check for unread messages
+         */
+        setUnreadMessages(false);
 
         setUpNavigationView();
 
@@ -349,5 +362,21 @@ public class HomeActivity extends AppCompatActivity
         if(fragment == null)
             fragment = new MyPlaydatesFragment();
         navToFragment(fragment);
+    }
+
+    /*
+        TODO: use setUnreadMessage to mark hamburger and navbar for unread messages
+     */
+    void setUnreadMessages(boolean showMarkers) {
+        if(showMarkers) {
+            navBarMessageMarker.setVisibility(View.VISIBLE);
+            if(hamburgerMessageMarker != null)
+                hamburgerMessageMarker.setVisibility(View.VISIBLE);
+        }
+        else {
+            navBarMessageMarker.setVisibility(View.INVISIBLE);
+            if(hamburgerMessageMarker != null)
+                hamburgerMessageMarker.setVisibility(View.INVISIBLE);
+        }
     }
 }

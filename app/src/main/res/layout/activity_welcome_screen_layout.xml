@@ -18,6 +18,19 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+        <TextView
+            android:id="@+id/hamburger_marker"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="35dp"
+            android:layout_marginTop="-45dp"
+            android:background="@drawable/hamburger_red_circle"
+            android:gravity="center"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:visibility="visible" />
+
     </android.support.design.widget.AppBarLayout>
 
     <FrameLayout

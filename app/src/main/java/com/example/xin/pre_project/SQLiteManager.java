@@ -30,7 +30,6 @@ public class SQLiteManager extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // create playdtes table
         String sql = "CREATE TABLE IF NOT EXISTS Playdates(" +
                 "_id integer primary key autoincrement," +
                 "date text, " +
@@ -49,6 +48,7 @@ public class SQLiteManager extends SQLiteOpenHelper {
                 "month integer, " +
                 "day integer)";
         db.execSQL(sql);
+
     }
 
     @Override

@@ -38,12 +38,19 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class message extends AppCompatActivity
         implements GoogleApiClient.OnConnectionFailedListener {
     // Firebase instance variables
     private DatabaseReference mFirebaseDatabaseReference;
+    
+    private DatabaseReference mFirebaseChatDataRef;
+
     private FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>
             mFirebaseAdapter;
 
@@ -109,9 +116,14 @@ public class message extends AppCompatActivity
             }
         };
 
+        // New child entries for both users in chats table
+        mFirebaseChatDataRef = FirebaseDatabase.getInstance().getReference("chats/");
+
         // Construct child name.
         String target_id = getIntent().getStringExtra("target_id");
         String user_id = getIntent().getStringExtra("user_id");
+
+
         if (target_id.compareTo(user_id) < 0) MESSAGES_CHILD = target_id + ":" + user_id;
         else MESSAGES_CHILD = user_id+":"+target_id;
 
@@ -229,6 +241,17 @@ public class message extends AppCompatActivity
                         null /* no image */);
                 mFirebaseDatabaseReference.child(MESSAGES_CHILD)
                         .push().setValue(friendlyMessage);
+
+                SingleChat chat = new SingleChat();
+                chat.setName("abc");
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+                chat.setTimestamp(timeStamp);
+                chat.setLastMessage(mMessageEditText.getText().toString());
+                String target_id = getIntent().getStringExtra("target_id");
+                String user_id = getIntent().getStringExtra("user_id");
+                mFirebaseChatDataRef.child(user_id).child(target_id).push().setValue(chat);
+                mFirebaseChatDataRef.child(target_id).child(user_id).push().setValue(chat);
+
                 mMessageEditText.setText("");
             }
         });
@@ -248,9 +271,6 @@ public class message extends AppCompatActivity
 
     @Override
     public void onStart() {
-        super.onStart();
-        // Check if user is signed in.
-        // TODO: Add code to check if user is signed in.
     }
 
     @Override

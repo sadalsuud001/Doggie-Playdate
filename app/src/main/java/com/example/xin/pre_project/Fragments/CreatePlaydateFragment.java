@@ -286,7 +286,7 @@ public class CreatePlaydateFragment extends Fragment {
 
         startActivity(calIntent);
     }
-
+  
     private void savePlaydateToSQLiteDB(Playdate pd) {
         SQLiteManager dbManager = new SQLiteManager(getContext());
         dbManager.addPlaydate(pd, getContext());

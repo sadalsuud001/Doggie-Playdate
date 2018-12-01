@@ -225,6 +225,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         setContentView(R.layout.activity_welcome_nav_drawer);
 
 
+
         // Set up message onClick listener.
         btnMessage = (Button) findViewById(R.id.btnMessage);
         btnMessage.setOnClickListener(new View.OnClickListener() {
@@ -431,6 +432,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 // GO TO LOGIN SCREEN
                                 Toast.makeText(getApplicationContext(), "Log out user", Toast.LENGTH_SHORT).show();
                                 navigationView.getMenu().getItem(navItemIndex).setChecked(false);
+                                
                                 navItemIndex = 6;
                                 selectNavMenu(navItemIndex);
                                 Intent go4 = new Intent(Welcome.this, HomeActivity.class);

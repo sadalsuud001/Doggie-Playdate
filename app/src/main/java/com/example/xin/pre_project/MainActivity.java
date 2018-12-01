@@ -131,6 +131,9 @@ public class MainActivity extends AppCompatActivity {
                             public void onFailure(@NonNull Exception e) {
                                 waitingDialog.dismiss();
                                 Snackbar.make((View) rootLayout, "Failed! " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
+                                Snackbar.make((View) rootLayout, "Failed! " + e.getMessage(), Snackbar.LENGTH_INDEFINITE).show();
+                                Log.d("aa", e.getMessage());
+
                                 //Active button
                                 btnSignIn.setEnabled(true);
                             }
@@ -209,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
                                                 Log.d("REGISTERUSER", e.getMessage());
+
                                                 Snackbar.make((View) rootLayout, "Failed " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
                                             }
                                         });

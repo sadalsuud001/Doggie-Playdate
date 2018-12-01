@@ -50,6 +50,7 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
     // Dog Pic
     ImageView dogPic;
     String picPath, dogName;
+  
     private static final int CAMERA_REQUEST = 1888;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
     private static final int GALLERY_REQUEST = 1999;
@@ -199,7 +200,6 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
             }
         });
 
-
         savePic = view.findViewById(R.id.savePic);
         loadPic = view.findViewById(R.id.loadPic);
 
@@ -278,13 +278,13 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
                 photo = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
                 dogPic.setImageBitmap(photo);
 
-                // save dog photo to local storage
+              // save dog photo to local storage
                 BitmapDrawable bitmapDrawable = (BitmapDrawable) dogPic.getDrawable();
                 Bitmap bitmap = bitmapDrawable.getBitmap();
                 ImageManager im = new ImageManager(getContext());
                 picPath = im.saveToInternalStorage(bitmap, dogName);
                 dogPic.setImageDrawable(null);
-
+              
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

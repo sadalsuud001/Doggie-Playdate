@@ -23,5 +23,4 @@ public class Dog {
     public void setProfilePic(String picPath) {
         this.profilePicPath = picPath;
     }
-
 }

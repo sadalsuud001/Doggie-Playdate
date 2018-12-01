@@ -180,8 +180,6 @@ public class HomeActivity extends AppCompatActivity
                     selectNavMenu(navItemIndex);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
                     if (fragment == null)
-                        fragment = new MyPlaydatesFragment();
-                    navToFragment(fragment);
             }
         }
         else {
@@ -208,6 +206,7 @@ public class HomeActivity extends AppCompatActivity
                             case R.id.navI_home:
                                 navItemIndex = 0;
                                 selectNavMenu(navItemIndex);
+
                                 Intent returnIntent = new Intent();
                                 returnIntent.putExtra("navItemIndex", navItemIndex);
                                 setResult(Activity.RESULT_OK, returnIntent);
@@ -265,6 +264,7 @@ public class HomeActivity extends AppCompatActivity
                                 // GO TO LOGIN SCREEN
                                 Toast.makeText(getApplicationContext(), "Log out user", Toast.LENGTH_SHORT).show();
                                 navItemIndex = 6;
+
                                 CURRENT_TAG = TAG_ADDDOG;
                                 selectNavMenu(navItemIndex);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);

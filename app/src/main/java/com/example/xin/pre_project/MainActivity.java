@@ -21,10 +21,17 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 //import com.nispok.snackbar.Snackbar;
 import android.support.design.widget.Snackbar;
+
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.FirebaseInstanceIdService;
+import com.google.firebase.iid.InstanceIdResult;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
@@ -76,7 +83,18 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+    // get FCM token
+    public class FirebaseInstanceIDService extends FirebaseInstanceIdService {
+        @Override
+        public void onTokenRefresh() {
+            String token = FirebaseInstanceId.getInstance().getToken();
+            registerToken(token);
+        }
 
+        private void registerToken(String token) {
+
+        }
+    }
     private void showLogInDialog() {
         final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         dialog.setTitle("SIGN IN ");
@@ -122,6 +140,21 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(AuthResult authResult) {
                                 waitingDialog.dismiss();
+                                //part13 3:50
+                                FirebaseDatabase.getInstance().getReference(Common.user_driver_tb1)
+                                        .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                Common.currentUser = dataSnapshot.getValue(User.class);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+
                                 startActivity(new Intent(MainActivity.this, Welcome.class));
                                 finish();
                             }

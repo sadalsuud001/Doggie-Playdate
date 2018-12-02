@@ -38,7 +38,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -253,6 +252,15 @@ public class message extends AppCompatActivity
                 mFirebaseChatDataRef.child(target_id).child(user_id).push().setValue(chat);
 
                 mMessageEditText.setText("");
+            }
+        });
+
+        ((Button) findViewById(R.id.goToChats)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(message.this, ChatList.class);
+                intent.putExtra("user_id", "12");
+                startActivity(intent);
             }
         });
 

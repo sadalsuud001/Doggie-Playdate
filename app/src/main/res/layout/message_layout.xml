@@ -43,6 +43,14 @@
             android:enabled="false"
             android:text="SEND"/>
 
+        <Button
+            android:id="@+id/goToChats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:enabled="false"
+            android:text="Go To Chats"/>
+
     </LinearLayout>
 
 </RelativeLayout>

@@ -293,7 +293,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         }
         mapFragment.getMapAsync(this);
 
-        getSupportFragmentManager().beginTransaction().add(R.id.mapframe, mapFragment).commit();
+        //getSupportFragmentManager().beginTransaction().add(R.id.mapframe, mapFragment).commit();
 
         //init view
         location_switch = (MaterialAnimatedSwitch)findViewById(R.id.location_switch);

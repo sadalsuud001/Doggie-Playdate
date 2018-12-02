@@ -4,6 +4,8 @@ import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -25,6 +27,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -60,6 +63,7 @@ import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -202,6 +206,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     Marker mCurrent;
     MaterialAnimatedSwitch location_switch;
     SupportMapFragment mapFragment;
+    boolean location_switch_state = false;
 
 
     // Find nearby drivers
@@ -241,7 +246,10 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_nav_drawer);
 
-
+        // restore location_switch position
+        if(savedInstanceState != null) {
+            location_switch_state = savedInstanceState.getBoolean("toggle");
+        }
 
         // Set up message onClick listener.
         btnMessage = (Button) findViewById(R.id.btnMessage);
@@ -272,30 +280,41 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
          */
         setUnreadMessages(false);
 
-        if(drawer != null)
+        //if(drawer != null)
             setUpNavigationView();
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        if(mapFragment == null) {
+            mapFragment = SupportMapFragment.newInstance();
+        }
         mapFragment.getMapAsync(this);
 
-        //init view
+        getSupportFragmentManager().beginTransaction().add(R.id.mapframe, mapFragment).commit();
 
+        //init view
         location_switch = (MaterialAnimatedSwitch)findViewById(R.id.location_switch);
+        if(location_switch_state) {
+            location_switch.toggle();
+        }
         location_switch.setOnCheckedChangeListener(new MaterialAnimatedSwitch.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(boolean isOnline) {
                 if(isOnline){
                     startLocationUpdates();
                     displayLocation();
+                    location_switch_state = true;
+                    Log.d("loc_switch", String.valueOf(location_switch_state));
                     Snackbar.make(mapFragment.getView(),"You are online", Snackbar.LENGTH_SHORT).show();
                 }
                 else{
                     stopLocationUpdates();
                     mCurrent.remove();
                     mMap.clear();
+                    location_switch_state = false;
+                    Log.d("loc_switch", String.valueOf(location_switch_state));
                     //handler.removeCallbacks(drawPathRunnable);
 
                     Snackbar.make(mapFragment.getView(),"You are offline", Snackbar.LENGTH_SHORT).show();
@@ -386,6 +405,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
 
 
         });
+
         setUpLocation();
         updateFirebaseToken();
     }
@@ -393,6 +413,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     private void updateFirebaseToken() {
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference tokens = db.getReference(Common.token_tb1);
+
 
         Token token = new Token(FirebaseInstanceId.getInstance().getToken());
         tokens.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
@@ -498,13 +519,13 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 startActivityForResult(go3, 0);
                                 break;
                             case R.id.action_logout:
-                                /*
-                                    TODO: Change to Logout user
-                                */
+                                    /*
+                                        TODO: Change to Logout user
+                                    */
                                 // GO TO LOGIN SCREEN
                                 Toast.makeText(getApplicationContext(), "Log out user", Toast.LENGTH_SHORT).show();
                                 navigationView.getMenu().getItem(navItemIndex).setChecked(false);
-                                
+
                                 navItemIndex = 6;
                                 selectNavMenu(navItemIndex);
                                 Intent go4 = new Intent(Welcome.this, HomeActivity.class);
@@ -520,7 +541,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                     }
                 });
 
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.openDrawer, R.string.closeDrawer) {
 
                 @Override
@@ -1060,4 +1081,16 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                 hamburgerMessageMarker.setVisibility(View.INVISIBLE);
         }
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+           setUpNavigationView();
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+
+        }
+        super.onConfigurationChanged(newConfig);
+    }
+
 }

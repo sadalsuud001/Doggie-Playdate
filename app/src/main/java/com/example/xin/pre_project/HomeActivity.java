@@ -76,7 +76,6 @@ public class HomeActivity extends AppCompatActivity
         setUpNavigationView();
 
         b = getIntent().getExtras();
-        getIntent().removeExtra("navItemIndex");
 
         if(savedInstanceState != null) {
             navItemIndex = savedInstanceState.getInt("saveIndex", 0);

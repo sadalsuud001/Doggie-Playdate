@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
                                 waitingDialog.dismiss();
                                 Snackbar.make((View) rootLayout, "Failed! " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
                                 Snackbar.make((View) rootLayout, "Failed! " + e.getMessage(), Snackbar.LENGTH_INDEFINITE).show();
-                                Log.d("aa", e.getMessage());
+                                Log.d("WTFWTF", e.getMessage());
 
                                 //Active button
                                 btnSignIn.setEnabled(true);

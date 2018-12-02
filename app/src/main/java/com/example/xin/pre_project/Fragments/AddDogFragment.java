@@ -10,8 +10,10 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,10 +27,17 @@ import android.widget.Toast;
 
 import com.example.xin.pre_project.Dog;
 import com.example.xin.pre_project.ImageManager;
+import com.example.xin.pre_project.Model.User;
 import com.example.xin.pre_project.R;
 import com.example.xin.pre_project.SQLiteManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -57,9 +66,9 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
 
     String name, breed;
     int gender, year, month, day;
+    String userName = "";
 
     Button addDog;
-    Button savePic, loadPic;
 
     public AddDogFragment() {
         // Required empty public constructor
@@ -121,15 +130,28 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
         radioGender.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                View radioButton = radioGender.findViewById(checkedId);
+                //View radioButton = radioGender.findViewById(checkedId);
+                int radioButtonID = radioGender.getCheckedRadioButtonId();
+                View radioButton = radioGender.findViewById(radioButtonID);
                 genderSelectedRadioId = radioGender.indexOfChild(radioButton);
+                switch(genderSelectedRadioId) {
+                    case 1: genderSelectedRadioId = 0; break;
+                    case 3: genderSelectedRadioId = 1; break;
+                }
             }
         });
         radioSize.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                View radioButton = radioSize.findViewById(checkedId);
+                //View radioButton = radioSize.findViewById(checkedId);
+                int radioButtonID = radioSize.getCheckedRadioButtonId();
+                View radioButton = radioSize.findViewById(radioButtonID);
                 sizeSelectedRadioId = radioSize.indexOfChild(radioButton);
+                switch(sizeSelectedRadioId) {
+                    case 2: sizeSelectedRadioId = 1; break;
+                    case 4: sizeSelectedRadioId = 2; break;
+                    default: sizeSelectedRadioId = 0; break;
+                }
             }
         });
 
@@ -178,11 +200,31 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
                     Dog newDog = new Dog(name, breed, genderSelectedRadioId, sizeSelectedRadioId, year, month, day);
                     SQLiteManager db = new SQLiteManager(getContext());
 
+                    // get user's name
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     if(user != null) {
                         String uid = user.getUid();
                         String email = user.getEmail();
-                        String userName = user.getDisplayName();
+
+                        /*
+                            TODO: get user's name from Firebase
+                         */
+                        DatabaseReference fb = FirebaseDatabase.getInstance().getReference().child("UsersInformation").child(uid);
+                        fb.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for(DataSnapshot ds : dataSnapshot.getChildren()) {
+                                    String s = ds.child("name").getValue(String.class);
+                                    Log.d("TAG", s);
+                                    setUserName(s);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
 
                         switch((int)db.addDog(userName, newDog)) {
                             case -1: Toast t = Toast.makeText(getContext(), "Error adding " + name + " to Dogs List", Toast.LENGTH_SHORT);
@@ -200,36 +242,11 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
             }
         });
 
-        savePic = view.findViewById(R.id.savePic);
-        loadPic = view.findViewById(R.id.loadPic);
 
-        savePic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dogName = addDogEditName.getText().toString();
-                BitmapDrawable bitmapDrawable = (BitmapDrawable) dogPic.getDrawable();
-                Bitmap bitmap = bitmapDrawable.getBitmap();
-                ImageManager im = new ImageManager(getContext());
-                picPath = im.saveToInternalStorage(bitmap, dogName);
-                dogPic.setImageDrawable(null);
-            }
-        });
+    }
 
-        loadPic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dogName = addDogEditName.getText().toString();
-                ImageManager im = new ImageManager(getContext());
-                Bitmap b = im.loadFromStorage(picPath, dogName);
-                if(b == null) {
-                    Toast t = Toast.makeText(getContext(), "Bitmap null", Toast.LENGTH_LONG);
-                    t.setGravity(Gravity.CENTER, 0, 0);
-                    t.show();
-                }
-                else
-                    dogPic.setImageBitmap(b);
-            }
-        });
+    private void setUserName(String name) {
+        userName = name;
     }
 
     // Birthday DatePicker accessory method

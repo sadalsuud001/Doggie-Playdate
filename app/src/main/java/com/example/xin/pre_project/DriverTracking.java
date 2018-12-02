@@ -202,7 +202,7 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
     private void sendArrivedNotification(String customerId) {
         Token token = new Token(customerId);
         //We will send notification with title is Arrived and body is this string.
-        Notification notification = new Notification("Arrived",String.format("Your friend has arrived at your location",Common.currentUser.getName()));
+        Notification notification = new Notification("Arrived",String.format("Your friend has arrived at your location"));
         Sender sender = new Sender(token.getToken(),notification);
 
         mFCMService.sendMessage(sender).enqueue(new Callback<FCMResponse>() {
@@ -235,25 +235,29 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
         Common.mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if(Common.mLastLocation != null){
 
-
-                final double latitude = Common.mLastLocation.getLatitude();
-                final double longtitude = Common.mLastLocation.getLongitude();
-            if(driverMarker != null){
-                driverMarker.remove();
-            }
-            driverMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude,longtitude))
-                    .title("You")
-                    .icon(BitmapDescriptorFactory.defaultMarker()));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longtitude),17.0f));
+            final double latitude = Common.mLastLocation.getLatitude();
+            final double longtitude = Common.mLastLocation.getLongitude();
 
             if(direction != null)
                 direction.remove(); // Remove old direction
             getDirection();
-                }
-                
-
-
-        else{
+            if (geoFire != null) {
+                geoFire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                        new GeoLocation(latitude, longtitude),
+                        new GeoFire.CompletionListener() {
+                            @Override
+                            public void onComplete(String key, DatabaseError error) {
+                                if(driverMarker != null){
+                                    driverMarker.remove();
+                                }
+                                driverMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude,longtitude))
+                                    .title("Your location")
+                                    .icon(BitmapDescriptorFactory.defaultMarker()));
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,longtitude),17.0f));
+                            }
+                        });
+            }
+        } else{
             Log.d("Error","Can not get your location");
         }
     }

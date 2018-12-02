@@ -246,6 +246,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_nav_drawer);
 
+        mFCMService = Common.getFCMService();
         // restore location_switch position
         if(savedInstanceState != null) {
             location_switch_state = savedInstanceState.getBoolean("toggle");
@@ -365,9 +366,6 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
             }
         });
 
-
-
-
         //Geo Fire
         // drivers mean users here
         drivers = FirebaseDatabase.getInstance().getReference(Common.user_location_tb1);
@@ -405,7 +403,6 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
 
 
         });
-
         setUpLocation();
         updateFirebaseToken();
     }
@@ -413,7 +410,6 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     private void updateFirebaseToken() {
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference tokens = db.getReference(Common.token_tb1);
-
 
         Token token = new Token(FirebaseInstanceId.getInstance().getToken());
         tokens.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
@@ -519,9 +515,9 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 startActivityForResult(go3, 0);
                                 break;
                             case R.id.action_logout:
-                                    /*
-                                        TODO: Change to Logout user
-                                    */
+                                /*
+                                    TODO: Change to Logout user
+                                */
                                 // GO TO LOGIN SCREEN
                                 Toast.makeText(getApplicationContext(), "Log out user", Toast.LENGTH_SHORT).show();
                                 navigationView.getMenu().getItem(navItemIndex).setChecked(false);
@@ -589,20 +585,19 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         GeoFire mGeoFire = new GeoFire(dbRequest);
         mGeoFire.setLocation(uid, new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
 
-        if(mUserMarker != null) {
-            if (mUserMarker.isVisible())
-                mUserMarker.remove();
-            // Add nre marker
-            mUserMarker = mMap.addMarker(new MarkerOptions()
-                    .title("Date Here")
-                    .snippet("")
-                    .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-            );
-            mUserMarker.showInfoWindow();
-            btnRequestDate.setText("Waiting for response...");
-            findUser();
+        if(mUserMarker != null && mUserMarker.isVisible()) {
+            mUserMarker.remove();
         }
+        // Add nre marker
+        mUserMarker = mMap.addMarker(new MarkerOptions()
+                .title("Date Here")
+                .snippet("")
+                .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+        );
+        mUserMarker.showInfoWindow();
+        btnRequestDate.setText("Waiting for response...");
+        findUser();
     }
 
     private void findUser() {
@@ -617,11 +612,11 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
 
-                if(!isUserFound) {
+                if(!isUserFound && !FirebaseAuth.getInstance().getCurrentUser().getUid().equals(key)) {
 
                     isUserFound = true;
                     userID = key;
-                    btnRequestDate.setText("Message");
+                    btnRequestDate.setText("Request nearest date");
                     Toast.makeText(Welcome.this,""+key,Toast.LENGTH_SHORT);
 
                 }
@@ -882,10 +877,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                 final double latitude = Common.mLastLocation.getLatitude();
                 final double longtitude = Common.mLastLocation.getLongitude();
 
-
-
                 // update to firebase
-
                 geoFire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                         new GeoLocation(latitude, longtitude),
                         new GeoFire.CompletionListener() {
@@ -933,15 +925,16 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                         User user = dataSnapshot.getValue(User.class);
+                        if (!FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(user.getEmail())) {
+                            // add user to map
 
-                        // add user to map
-
-                        mMap.addMarker(new MarkerOptions().
-                                position(new LatLng(location.latitude,location.longitude))
-                                .flat(true)
-                                .title(user.getName())
-                                .snippet("Phone: " + user.getPhone())
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.dog)));
+                            mMap.addMarker(new MarkerOptions().
+                                    position(new LatLng(location.latitude, location.longitude))
+                                    .flat(true)
+                                    .title(user.getName())
+                                    .snippet("Phone: " + user.getPhone())
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.dog)));
+                        }
 
                     }
 
@@ -1010,7 +1003,9 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                 (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)){
             return;
         }
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        if (mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }
     }
 
 

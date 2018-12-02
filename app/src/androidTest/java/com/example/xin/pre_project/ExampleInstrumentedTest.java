@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.xin.firex", appContext.getPackageName());
+        assertEquals("com.example.xin.pre_project", appContext.getPackageName());
     }
 }

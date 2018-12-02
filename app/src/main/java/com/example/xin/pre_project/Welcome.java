@@ -38,7 +38,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.xin.pre_project.Common.Common;
+import com.example.xin.pre_project.Model.FCMResponse;
+import com.example.xin.pre_project.Model.Notification;
+import com.example.xin.pre_project.Model.Sender;
+import com.example.xin.pre_project.Model.Token;
 import com.example.xin.pre_project.Model.User;
+import com.example.xin.pre_project.remote.IFCMService;
 import com.example.xin.pre_project.remote.IGoogleAPI;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -49,6 +54,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
@@ -62,6 +68,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -76,6 +84,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -87,6 +97,8 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static com.example.xin.pre_project.Common.Common.mLastLocation;
 
 public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -108,7 +120,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     private static final int PLAY_SERVICE_RES_REQUEST = 7001;
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
-    private Location mLastLocation;
+    //private Location mLastLocation;
 
     private static int UPDATE_INTERVAL = 5000;
     private static int FATEST_INTERVAL = 3000;
@@ -133,7 +145,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     private PolylineOptions polylineOptions, blackPolylineOptions;
     private Polyline blackPolyline, greyPolyline;
 
-    private IGoogleAPI mService;
+    private IGoogleAPI mService = Common.getGoogleAPI();
 
     Runnable drawPathRunnable = new Runnable() {
         @Override
@@ -227,6 +239,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     private Fragment fragment;
 
 
+    //Send Alert
+    IFCMService mFCMService; //33:45
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -352,16 +366,17 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         });
 
 
-        setUpLocation();
+
 
         //Geo Fire
         // drivers mean users here
         drivers = FirebaseDatabase.getInstance().getReference(Common.user_location_tb1);
         geoFire = new GeoFire(drivers);
+        setUpLocation();
 
+       // mService = Common.getGoogleAPI();
 
-
-        mService = Common.getGoogleAPI();
+        updateFirebaseToken();
 
         // Init view of bottom sheet
         imgExpandable = (ImageView)findViewById(R.id.imgExpandable);
@@ -380,25 +395,67 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
             @Override
             public void onClick(View view) {
 
-
-
-                requestDateHere(FirebaseAuth.getInstance().getCurrentUser().getUid());
-
-
-
+                //29:14
+                if(!isUserFound)
+                    requestDateHere(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                else
+                    sendRequestToUser(userID);
             }
 
 
 
         });
+
+        setUpLocation();
+        updateFirebaseToken();
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Bundle b = new Bundle();
-        b.putBoolean("toggle", location_switch_state);
+    private void updateFirebaseToken() {
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference tokens = db.getReference(Common.token_tb1);
 
+
+        Token token = new Token(FirebaseInstanceId.getInstance().getToken());
+        tokens.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .setValue(token);
+    }
+    //rider App 34:44
+    private void sendRequestToUser(String userID) {
+        DatabaseReference tokens = FirebaseDatabase.getInstance().getReference(Common.token_tb1);
+        tokens.orderByKey().equalTo(userID)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for(DataSnapshot postSnapshot:dataSnapshot.getChildren()){
+                            Token token = postSnapshot.getValue(Token.class);// Get Token object form database with key
+                            //Make raw payload - convert LatLng to json
+                            String json_lat_lng = new Gson().toJson(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+                            String riderToken = FirebaseInstanceId.getInstance().getToken();
+                            Notification data = new Notification(riderToken,json_lat_lng);// send to Driver app and we will deserialize it again
+                            Sender content = new Sender(token.getToken(),data);
+                            mFCMService.sendMessage(content)
+                                    .enqueue(new Callback<FCMResponse>() {
+                                        @Override
+                                        public void onResponse(Call<FCMResponse> call, Response<FCMResponse> response) {
+                                            if(response.body().success == 1)
+                                                Toast.makeText(Welcome.this, "Request sent!", Toast.LENGTH_SHORT).show();
+                                            else
+                                                Toast.makeText(Welcome.this, "Failed !", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<FCMResponse> call, Throwable t) {
+                                            Log.e("ERROR",t.getMessage());
+                                        }
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
     }
 
     private void selectNavMenu(int navItemIndex) {
@@ -532,25 +589,20 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         GeoFire mGeoFire = new GeoFire(dbRequest);
         mGeoFire.setLocation(uid, new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
 
-        if(mUserMarker.isVisible())
-            mUserMarker.remove();
-        // Add nre marker
-        mUserMarker = mMap.addMarker(new MarkerOptions()
-                .title("Date Here")
-                .snippet("")
-                .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-        );
-
-        // Todo: show info
-        mUserMarker.showInfoWindow();
-
-        // Todo: show more info
-        btnRequestDate.setText("Looking for Nearby Users...");
-
-        findUser();
-
-
+        if(mUserMarker != null) {
+            if (mUserMarker.isVisible())
+                mUserMarker.remove();
+            // Add nre marker
+            mUserMarker = mMap.addMarker(new MarkerOptions()
+                    .title("Date Here")
+                    .snippet("")
+                    .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+            );
+            mUserMarker.showInfoWindow();
+            btnRequestDate.setText("Waiting for response...");
+            findUser();
+        }
     }
 
     private void findUser() {
@@ -607,7 +659,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     }
 
     private void getDirection() {
-        currentPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        currentPosition = new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude());
 
         String requestApi = null;
         try {
@@ -822,13 +874,15 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                 (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)){
             return;
         }
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if(mLastLocation != null){
+        Common.mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if(Common.mLastLocation != null){
 
             if(location_switch.isChecked()) {
 
-                final double latitude = mLastLocation.getLatitude();
-                final double longtitude = mLastLocation.getLongitude();
+                final double latitude = Common.mLastLocation.getLatitude();
+                final double longtitude = Common.mLastLocation.getLongitude();
+
+
 
                 // update to firebase
 
@@ -866,7 +920,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         DatabaseReference userLocation = FirebaseDatabase.getInstance().getReference(Common.user_location_tb1);
         GeoFire gf = new GeoFire(userLocation);
 
-        GeoQuery geoQuery = gf.queryAtLocation(new GeoLocation(mLastLocation.getLatitude(),mLastLocation.getLongitude()),distance);
+        GeoQuery geoQuery = gf.queryAtLocation(new GeoLocation(Common.mLastLocation.getLatitude(),Common.mLastLocation.getLongitude()),distance);
         geoQuery.removeAllListeners();
 
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
@@ -1003,7 +1057,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     }
     @Override
     public void onLocationChanged(Location location) {
-        mLastLocation = location;
+        Common.mLastLocation = location;
         displayLocation();
     }
 /*

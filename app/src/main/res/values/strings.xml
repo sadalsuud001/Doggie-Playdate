@@ -10,4 +10,6 @@
     <string name="closeDrawer">close_drawer</string>
     <string name="mainactivitytitle">D O G G I E
         \nP L A Y D A T E</string>
+    <string name="title_activity_customer_call">CustomerCall</string>
+    <string name="title_activity_driver_tracking">DriverTracking</string>
 </resources>

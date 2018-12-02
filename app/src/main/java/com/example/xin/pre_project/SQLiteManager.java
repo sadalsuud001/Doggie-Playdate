@@ -39,7 +39,7 @@ public class SQLiteManager extends SQLiteOpenHelper {
         db.execSQL(sql);
 
         // create dogs table
-        sql = "CREATE TABLE IF NOT EXISTS " + userName + "_Dogs(" +
+        String sql1 = "CREATE TABLE IF NOT EXISTS " + userName + "_Dogs(" +
                 "name text primary key, " +
                 "breed text, " +
                 "gender integer, " +
@@ -47,7 +47,7 @@ public class SQLiteManager extends SQLiteOpenHelper {
                 "year integer, " +
                 "month integer, " +
                 "day integer)";
-        db.execSQL(sql);
+        db.execSQL(sql1);
 
     }
 
@@ -157,9 +157,28 @@ public class SQLiteManager extends SQLiteOpenHelper {
         cv1.put("year", newDog.bdayYear);
         cv1.put("month", newDog.bdayMonth);
         cv1.put("day", newDog.bdayDay);
+        int val;
 
         SQLiteDatabase db = getWritableDatabase();
-        return db.insert(userName + "_Dogs", null, cv1);
+        try {
+            String sql = "CREATE TABLE IF NOT EXISTS " + userName + "_Dogs(" +
+                    "name text primary key, " +
+                    "breed text, " +
+                    "gender integer, " +
+                    "size integer, " +
+                    "year integer, " +
+                    "month integer, " +
+                    "day integer)";
+            db.execSQL(sql);
+
+            db.beginTransaction();
+            val = (int)db.insert(userName + "_Dogs", null, cv1);
+            db.setTransactionSuccessful();
+        }
+        finally {
+            db.endTransaction();
+        }
+        return val;
     }
 
     public void removeDog(String userName, String dogName) {

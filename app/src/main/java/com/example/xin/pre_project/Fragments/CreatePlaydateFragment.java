@@ -282,7 +282,7 @@ public class CreatePlaydateFragment extends Fragment {
         calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
                 calDate.getTimeInMillis());
         calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
-                calDate.getTimeInMillis());
+                calDate.getTimeInMillis()+(30*60000));  // default duration 30 minutes
 
         startActivity(calIntent);
     }

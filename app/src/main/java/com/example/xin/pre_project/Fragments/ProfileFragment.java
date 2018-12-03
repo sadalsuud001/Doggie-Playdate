@@ -1,6 +1,8 @@
 package com.example.xin.pre_project.Fragments;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -15,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.xin.pre_project.Dog;
 import com.example.xin.pre_project.DogRVAdapter;
 import com.example.xin.pre_project.HomeActivity;
@@ -92,12 +95,9 @@ public class ProfileFragment extends Fragment {
         if (context instanceof ProfileFragment.AddDogFAB) {
             mCallback = (ProfileFragment.AddDogFAB) context;
         }
-   /*     else if (context instanceof MealDetailFragment.ScheduleMealListener) {
-            scheduleMealListener = (MealDetailFragment.ScheduleMealListener) context;
-        }*/
         else {
             throw new RuntimeException(context.toString()
-                    + " must implement MadeMealListener and/or ScheduleMealListener");
+                    + " must implement ProfileFragment AddDogFAB click listener");
         }
     }
 
@@ -154,15 +154,29 @@ public class ProfileFragment extends Fragment {
             tvUsername.setText(userName);
             tvEmail.setText(email);
 
+            // get photo from firebase
+            Uri photoUri = user.getPhotoUrl();
+            Glide.with(getContext())
+                    .load(photoUri)
+                    .into(profilePic);
+        }
+        else {
+            // check local storage
+            Toast t = Toast.makeText(getContext(), "Error loading user profile from firebase", Toast.LENGTH_SHORT);
+            t.setGravity(Gravity.TOP, 0,0);
+            t.show();
             if(userName == null)
                 getUserName();
             ImageManager im = new ImageManager(HomeActivity.gContext, userName);
-            profilePic.setImageBitmap(im.loadFromStorage(""));
-        }
-        else {
-            Toast t = Toast.makeText(getContext(), "Error loading user profile", Toast.LENGTH_SHORT);
-            t.setGravity(Gravity.TOP, 0,0);
-            t.show();
+            Bitmap bm = im.loadFromStorage("");
+            if(bm != null)
+                profilePic.setImageBitmap(bm);
+            else {
+                t = Toast.makeText(getContext(), "No local profile pic found - using default", Toast.LENGTH_SHORT);
+                t.setGravity(Gravity.TOP, 0,0);
+                t.show();
+                profilePic.setImageResource(R.drawable.default_profile_pic);
+            }
         }
     }
 

@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,14 +30,24 @@ import com.example.xin.pre_project.HomeActivity;
 import com.example.xin.pre_project.ImageManager;
 import com.example.xin.pre_project.R;
 import com.example.xin.pre_project.SQLiteManager;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -300,6 +311,8 @@ public class AccountSettingsFragment extends Fragment implements Spinner.OnItemS
             profilePic.setImageBitmap(photo);
             ImageManager im = new ImageManager(HomeActivity.gContext, userName);
             im.saveToInternalStorage(photo);
+            Log.d("savephoto", "result");
+            savePhotoInFB(photo);
         }
 
         if(requestCode == GALLERY_REQUEST && resultCode == Activity.RESULT_OK) {
@@ -309,6 +322,9 @@ public class AccountSettingsFragment extends Fragment implements Spinner.OnItemS
                 profilePic.setImageBitmap(photo);
                 ImageManager im = new ImageManager(getContext(), userName);
                 im.saveToInternalStorage(photo);
+                Log.d("savephoto", "result");
+                savePhotoInFB(photo);
+
             } catch (FileNotFoundException e) {
                 Toast.makeText(getContext(), "Error saving file", Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
@@ -316,6 +332,56 @@ public class AccountSettingsFragment extends Fragment implements Spinner.OnItemS
                 e.printStackTrace();
             }
         }
+    }
+
+    private void savePhotoInFB(Bitmap photo) {
+        final StorageReference storageRef = FirebaseStorage.getInstance().getReference().child(userName + "/profile.jpg");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        photo.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+
+        UploadTask uploadTask = storageRef.putBytes(data);
+        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+
+                // Continue with the task to get the download URL
+                return storageRef.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+                    Uri downloadUri = task.getResult();
+                    String photoURI = downloadUri.toString();
+
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                            .setPhotoUri(downloadUri)
+                            .build();
+
+                    user.updateProfile(profileUpdates)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Log.d("savephoto", "User profile updated.");
+                                    }
+                                }
+                            });
+
+
+
+                } else {
+                    // Handle failures
+                    // ...
+                }
+            }
+        });
     }
 
 }

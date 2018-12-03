@@ -64,6 +64,7 @@ import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -94,7 +95,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -103,15 +106,18 @@ import retrofit2.Response;
 import static com.example.xin.pre_project.Common.Common.mLastLocation;
 
 public class Welcome extends FragmentActivity implements OnMapReadyCallback,
+        GoogleMap.OnMarkerClickListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
         com.google.android.gms.location.LocationListener  {
 
+    private Map<Marker, String> user_marker_to_email_address = new HashMap<Marker, String>();
+    private String selected_user_email;
+
     //message part variables init
     Button btnMessage, btnCreatePlaydate;
     final private String testUid = "MyvsPO4Zj7YvQxQaL4jqyBjnX7I2";
-    private String target_id = "34";
 
 
 
@@ -263,12 +269,10 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         btnMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (selected_user_email == null) return;
                 Intent intent = new Intent(Welcome.this, message.class);
-                //TODO: user id should be passed in from main activity.
-                intent.putExtra("user_id", "12");
-                //TODO: if target_id==null, will not allow user to enter message activity
-                intent.putExtra("target_id", target_id);
+                intent.putExtra("user_id", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                intent.putExtra("target_id", selected_user_email);
                 startActivity(intent);
             }
         });
@@ -955,7 +959,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                     .title(user.getName())
                                     .snippet("Phone: " + user.getPhone())
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.dog)));
-                            mOtherUserMarkers.add(marker);
+                            user_marker_to_email_address.put(marker, dataSnapshot.getKey());
                         }
 
                     }
@@ -1039,6 +1043,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         mMap.setIndoorEnabled(false);
         mMap.setBuildingsEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.setOnMarkerClickListener(this);
     }
 
 
@@ -1108,6 +1113,15 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
 
         }
         super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public boolean onMarkerClick (Marker marker) {
+        if (user_marker_to_email_address.get(marker) != null) {
+            selected_user_email = user_marker_to_email_address.get(marker);
+            Log.d("aaa", selected_user_email);
+        }
+        return true;
     }
 
 

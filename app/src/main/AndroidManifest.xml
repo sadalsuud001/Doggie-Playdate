@@ -53,6 +53,7 @@
             android:name="com.example.xin.pre_project.google_maps_api"
             android:label="@string/title_activity_google_maps_api" />
         <activity android:name="com.example.xin.pre_project.message"/>
+        <activity android:name="com.example.xin.pre_project.ChatList"/>
         <activity android:name="com.example.xin.pre_project.HomeActivity" />
      <!--   <activity android:name=".Fragments.NonMapActivity"></activity> -->
         <service android:name=".Service.MyFirebaseIdService">

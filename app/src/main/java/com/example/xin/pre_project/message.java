@@ -23,32 +23,47 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.xin.pre_project.Common.Common;
+import com.example.xin.pre_project.Model.FCMResponse;
+import com.example.xin.pre_project.Model.Notification;
+import com.example.xin.pre_project.Model.Sender;
+import com.example.xin.pre_project.Model.Token;
+import com.example.xin.pre_project.Model.User;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.firebase.ui.database.SnapshotParser;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-
+import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static com.example.xin.pre_project.Common.Common.mLastLocation;
 
 public class message extends AppCompatActivity
         implements GoogleApiClient.OnConnectionFailedListener {
     // Firebase instance variables
     private DatabaseReference mFirebaseDatabaseReference;
-    
+
     private DatabaseReference mFirebaseChatDataRef;
 
     private FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>
@@ -68,6 +83,7 @@ public class message extends AppCompatActivity
             messengerImageView = (CircleImageView) itemView.findViewById(R.id.messengerImageView);
         }
     }
+    private String target_email;
 
     private static final String TAG = "MessageActivity";
     private String MESSAGES_CHILD = "Messages";
@@ -82,6 +98,7 @@ public class message extends AppCompatActivity
     private SharedPreferences mSharedPreferences;
 
     private Button mSendButton;
+    private Button btnChatList;
     private RecyclerView mMessageRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
     private EditText mMessageEditText;
@@ -95,7 +112,7 @@ public class message extends AppCompatActivity
         setContentView(R.layout.message_layout);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         // Set default username is anonymous.
-        mUsername = ANONYMOUS;
+        mUsername = FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
         // Initialize ProgressBar and RecyclerView.
         mMessageRecyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
@@ -122,6 +139,23 @@ public class message extends AppCompatActivity
         // Construct child name.
         String target_id = getIntent().getStringExtra("target_id");
         String user_id = getIntent().getStringExtra("user_id");
+        Log.d("target_id", target_id);
+
+        // Get target email from target id.
+        FirebaseDatabase.getInstance().getReference("UsersInformation/").orderByKey().equalTo(target_id)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        DataSnapshot firstChild = dataSnapshot.getChildren().iterator().next();
+                        User user = firstChild.getValue(User.class);
+                        //System.out.println(user);
+                        target_email = user.getEmail();
+                        Log.d("email",target_email);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {}
+                });
 
 
         if (target_id.compareTo(user_id) < 0) MESSAGES_CHILD = target_id + ":" + user_id;
@@ -243,16 +277,29 @@ public class message extends AppCompatActivity
                         .push().setValue(friendlyMessage);
 
                 SingleChat chat = new SingleChat();
-                chat.setName("abc");
+                chat.setName(target_email);
                 String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
                 chat.setTimestamp(timeStamp);
                 chat.setLastMessage(mMessageEditText.getText().toString());
                 String target_id = getIntent().getStringExtra("target_id");
                 String user_id = getIntent().getStringExtra("user_id");
-                mFirebaseChatDataRef.child(user_id).child(target_id).push().setValue(chat);
-                mFirebaseChatDataRef.child(target_id).child(user_id).push().setValue(chat);
 
+                mFirebaseChatDataRef.child(user_id).child(target_id).setValue(chat);
+
+
+                chat.setName(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                mFirebaseChatDataRef.child(target_id).child(user_id).setValue(chat);
                 mMessageEditText.setText("");
+            }
+        });
+
+
+        btnChatList = (Button) findViewById(R.id.goToChats);
+        btnChatList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(message.this, ChatList.class);
+                startActivity(intent);
             }
         });
 

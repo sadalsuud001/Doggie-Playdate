@@ -51,7 +51,7 @@
                 android:layout_gravity="center_vertical"/>
 
             <Button
-                android:id="@+id/btnRegister"
+                android:id="@+id/btnCreatePlaydate"
                 android:layout_width="0dp"
                 android:layout_weight="6"
                 android:layout_height="wrap_content"

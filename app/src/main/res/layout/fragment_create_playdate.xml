@@ -16,6 +16,7 @@
         android:text="Invite: "
         android:textSize="15dp"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:onClick="showUsers"/>
 
     <EditText
@@ -92,7 +93,8 @@
         <EditText
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="LOCATION SEARCH BAR HERE"/>
+            android:text="(google place autocomplete frag)"
+            android:textSize="13dp"/>
     </LinearLayout>
 
     <FrameLayout
@@ -101,10 +103,29 @@
         android:layout_below="@+id/cpLL2"
         android:minHeight="390dp">
 
+        <EditText
+            android:id="@+id/inputLatitude"
+            android:layout_width="100dp"
+            android:hint="Latitude"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="20dp"
+            android:inputType="numberDecimal|numberSigned"/>
+
+        <EditText
+            android:id="@+id/inputLongitude"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:hint="Longitude"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="right"
+            android:layout_marginRight="20dp"
+            android:inputType="numberDecimal|numberSigned"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="GOOGLE MAPS IN THIS FRAME LAYOUT"
+            android:text="Maps frag"
             android:layout_gravity="center"/>
 
     </FrameLayout>
@@ -115,6 +136,7 @@
         android:layout_height="wrap_content"
         android:text="Set up playdate"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>

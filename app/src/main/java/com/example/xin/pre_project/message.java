@@ -30,6 +30,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -94,7 +95,7 @@ public class message extends AppCompatActivity
         setContentView(R.layout.message_layout);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         // Set default username is anonymous.
-        mUsername = ANONYMOUS;
+        mUsername = FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
         // Initialize ProgressBar and RecyclerView.
         mMessageRecyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
@@ -279,6 +280,7 @@ public class message extends AppCompatActivity
 
     @Override
     public void onStart() {
+        super.onStart();
     }
 
     @Override

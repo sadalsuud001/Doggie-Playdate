@@ -372,7 +372,7 @@ public class CreatePlaydateFragment extends Fragment {
                 TODO: save playdate to firebase
 
              */
-            //addPlaydateToDeviceCalendar(pd);
+            addPlaydateToDeviceCalendar(pd);
             SQLiteManager dbManager = new SQLiteManager(getContext(), userName);
             int x = dbManager.addPlaydate(pd, getContext());
             Log.d("mypd", "create pd: " + Integer.toString(x));

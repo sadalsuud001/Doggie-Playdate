@@ -9,7 +9,7 @@ public class Dog {
     public String profilePicPath;
     private static int idCounter = 0;
 
-    public Dog(String name, String breed, int gender, int size, int year, int month, int day) {
+    public Dog(String name, String breed, int gender, int size, int year, int month, int day, String path) {
         this.id = idCounter++;
         this.name = name;
         this.breed = breed;
@@ -18,6 +18,7 @@ public class Dog {
         this.bdayYear = year;
         this.bdayMonth = month;
         this.bdayDay = day;
+        this.profilePicPath = path;
     }
 
     public void setProfilePic(String picPath) {

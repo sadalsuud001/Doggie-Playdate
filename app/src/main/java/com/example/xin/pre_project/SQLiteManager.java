@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.view.Gravity;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 public class SQLiteManager extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "DoggiePlaydate";
     private static final int DATABASE_VERSION = 1;
@@ -46,7 +48,8 @@ public class SQLiteManager extends SQLiteOpenHelper {
                 "size integer, " +
                 "year integer, " +
                 "month integer, " +
-                "day integer)";
+                "day integer, " +
+                "path text)";
         db.execSQL(sql1);
     }
 
@@ -147,6 +150,43 @@ public class SQLiteManager extends SQLiteOpenHelper {
         return null;
     }
 
+    public ArrayList<Dog> getAllDogs(String username) {
+        ArrayList<Dog> dogs = new ArrayList<>();
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c;
+        try {
+            c = db.rawQuery("SELECT * from " + username + "_Dogs", null);
+        } catch (Exception e) {
+            c = null;
+            e.printStackTrace();
+        }
+        if(c != null) {
+            if (c.moveToFirst()) {
+                do {
+                    String name, breed, path;
+                    int gender, size, year, month, day;
+                    Dog d;
+
+                    name = c.getString(c.getColumnIndexOrThrow("name"));
+                    breed = c.getString(c.getColumnIndexOrThrow("name"));
+                    gender = c.getInt(c.getColumnIndexOrThrow("gender"));
+                    size = c.getInt(c.getColumnIndexOrThrow("size"));
+                    year = c.getInt(c.getColumnIndexOrThrow("year"));
+                    month = c.getInt(c.getColumnIndexOrThrow("month"));
+                    day = c.getInt(c.getColumnIndexOrThrow("day"));
+                    path = c.getString(c.getColumnIndexOrThrow("path"));
+
+                    d = new Dog(name, breed, gender, size, year, month, day, path);
+                    dogs.add(d);
+                } while (c.moveToNext());
+                c.close();
+                return dogs;
+            }
+        }
+        return dogs;
+    }
+
     public long addDog(String userName, Dog newDog) {
         ContentValues cv1 = new ContentValues();
         cv1.put("name", newDog.name);
@@ -156,6 +196,7 @@ public class SQLiteManager extends SQLiteOpenHelper {
         cv1.put("year", newDog.bdayYear);
         cv1.put("month", newDog.bdayMonth);
         cv1.put("day", newDog.bdayDay);
+        cv1.put("path", newDog.profilePicPath);
         int val;
 
         SQLiteDatabase db = getWritableDatabase();
@@ -167,7 +208,8 @@ public class SQLiteManager extends SQLiteOpenHelper {
                     "size integer, " +
                     "year integer, " +
                     "month integer, " +
-                    "day integer)";
+                    "day integer, " +
+                    "path text)";
             db.execSQL(sql);
             db.beginTransaction();
             val = (int)db.insert(userName + "_Dogs", null, cv1);
@@ -181,7 +223,7 @@ public class SQLiteManager extends SQLiteOpenHelper {
 
     public void removeDog(String userName, String dogName) {
         SQLiteDatabase db = getWritableDatabase();
-        switch(db.delete(userName + "_Dogs", "name=" + dogName, null)) {
+        switch(db.delete(userName + "_Dogs", "name=\"" + dogName + "\"", null)) {
             case 0: Toast t = Toast.makeText(myContext, "Error: dog not found", Toast.LENGTH_SHORT);
                 t.setGravity(Gravity.CENTER, 0 ,0);
                 t.show();

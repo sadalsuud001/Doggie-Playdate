@@ -22,21 +22,33 @@
         android:text="Profile pic:"
         android:textSize="20sp"
         android:layout_below="@+id/addDogTitle"
-        android:layout_marginTop="35dp"/>
+        android:layout_marginTop="55dp"/>
 
     <FrameLayout
+        android:id="@+id/fl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/addDogAddPic"
-        android:layout_marginLeft="20dp"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="60dp">
-        <ImageView
-            android:id="@+id/addDogProfilePic"
-            android:layout_width="75dp"
-            android:layout_height="75dp"
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/dogPic"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:src="@drawable/defaultdogpic"
-            android:scaleType="fitCenter"/>
+            app:civ_border_width="2dp"
+            app:civ_border_color="#FF000000"/>
+
     </FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tap to edit"
+        android:textSize="10dp"
+        android:layout_below="@id/fl"
+        android:layout_centerHorizontal="true"/>
 
     <TextView
         android:id="@+id/addDogName"
@@ -45,7 +57,7 @@
         android:text="Name:"
         android:textSize="20sp"
         android:layout_below="@+id/addDogAddPic"
-        android:layout_marginTop="45dp"/>
+        android:layout_marginTop="80dp"/>
 
     <EditText
         android:id="@+id/addDogEditName"
@@ -178,8 +190,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="ADD DOG"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"/>
+        android:layout_below="@+id/addDogRadioGroupSize"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"/>
 
 </RelativeLayout>
 </ScrollView>

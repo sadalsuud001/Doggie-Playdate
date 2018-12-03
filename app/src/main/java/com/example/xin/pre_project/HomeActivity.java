@@ -1,6 +1,7 @@
 package com.example.xin.pre_project;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.support.annotation.NonNull;
@@ -31,7 +32,10 @@ public class HomeActivity extends AppCompatActivity
 
         implements
         MyPlaydatesFragment.PlaydateListener,
-        CreatePlaydateFragment.AfterCreatePlaydate {
+        CreatePlaydateFragment.AfterCreatePlaydate,
+        ProfileFragment.AddDogFAB,
+        AddDogFragment.ReturnToProfile {
+    public static Context gContext;
 
     private NavigationView navigationView;
     private DrawerLayout drawer;
@@ -58,6 +62,8 @@ public class HomeActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_nav_drawer);
+
+        gContext = this;
 
         toolbar = findViewById(R.id.toolbar);
         drawer = findViewById(R.id.drawer_layout);
@@ -400,7 +406,7 @@ public class HomeActivity extends AppCompatActivity
     /*
         TODO: use setUnreadMessage to mark hamburger and navbar for unread messages
      */
-    void setUnreadMessages(boolean showMarkers) {
+    public void setUnreadMessages(boolean showMarkers) {
         if(showMarkers) {
             navBarMessageMarker.setVisibility(View.VISIBLE);
             if(hamburgerMessageMarker != null)
@@ -411,5 +417,21 @@ public class HomeActivity extends AppCompatActivity
             if(hamburgerMessageMarker != null)
                 hamburgerMessageMarker.setVisibility(View.INVISIBLE);
         }
+    }
+
+    // Implement AddDogFAB interface
+    public void navToAddDog() {
+        CURRENT_TAG = TAG_ADDDOG;
+        AddDogFragment fragment = new AddDogFragment();
+        navToFragment(fragment);
+    }
+
+    // Implement ReturnToProfile interface
+    public void navToProfile() {
+        CURRENT_TAG = TAG_PROFILE;
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_PROFILE);
+        if(fragment == null)
+            fragment = new ProfileFragment();
+        navToFragment(fragment);
     }
 }

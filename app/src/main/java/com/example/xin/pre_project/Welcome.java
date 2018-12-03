@@ -38,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.xin.pre_project.Common.Common;
+import com.example.xin.pre_project.Fragments.ProfileFragment;
 import com.example.xin.pre_project.Model.FCMResponse;
 import com.example.xin.pre_project.Model.Notification;
 import com.example.xin.pre_project.Model.Sender;
@@ -104,8 +105,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
-        com.google.android.gms.location.LocationListener
-{
+        com.google.android.gms.location.LocationListener  {
 
     //message part variables init
     Button btnMessage, btncreatePlaydate;

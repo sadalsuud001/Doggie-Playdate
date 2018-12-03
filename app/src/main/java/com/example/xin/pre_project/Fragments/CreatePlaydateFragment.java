@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.xin.pre_project.PDAttendee;
 import com.example.xin.pre_project.Playdate;
 import com.example.xin.pre_project.R;
 import com.example.xin.pre_project.SQLiteManager;
@@ -35,6 +37,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,17 +50,20 @@ public class CreatePlaydateFragment extends Fragment {
     Spinner filterSpinner;
 
     ArrayAdapter<CharSequence> filterSpinnerAdapter;
-    ArrayList<String> userEmailList, userNameList, inviteList;  // invite list used for backend Playdate creation
+    ArrayList<String> userEmailList, userNameList, userUIDList;
+    String playdatePartner;
     ArrayList<Float> userDistanceList;
     int indexFilterSelection = 0,      // 0 = 1 mile, 1 = 2 mile, 2 = 5 mile
-            indexUserSelection = -1;
+            chosenUserIndex = -1;
 
     DatePickerDialog datePicker;
     int dmonth= -1, dday = -1, dyear = -1;
     TimePickerDialog timePicker;
     int thour = -1, tminute = -1;
 
-    String userName;
+    String userName, myUID, friendUID;
+
+    EditText inputLat, inputLon;
 
     Location meetingLocation;    // String meetingAddress ?
 
@@ -98,12 +105,22 @@ public class CreatePlaydateFragment extends Fragment {
         chooseDate = view.findViewById(R.id.cpETDate);
         chooseTime = view.findViewById(R.id.cpETTime);
 
+        inputLat = view.findViewById(R.id.inputLatitude);
+        inputLon = view.findViewById(R.id.inputLongitude);
+
         userEmailList = new ArrayList<>();
         userNameList = new ArrayList<>();
+        userUIDList = new ArrayList<>();
+
+        myUID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         /*
-            TODO: placeholder data
+            TODO: populate user data
+            get List<String> uids
+            userUIDList = uids;
          */
+        //fillUserLists(uids);
+
         userNameList.add("Bob");
         userNameList.add("Sally");
         userNameList.add("Frank");
@@ -114,7 +131,6 @@ public class CreatePlaydateFragment extends Fragment {
         userEmailList.add("d@d.com");
 
         userDistanceList = new ArrayList<>();
-        inviteList = new ArrayList<>();
 
         // set up buttonInvite
         buttonInvite.setOnClickListener(new View.OnClickListener() {
@@ -190,19 +206,44 @@ public class CreatePlaydateFragment extends Fragment {
         });
     }
 
+    private void fillUserLists(ArrayList<String> uids) {
+        // given ArrayList<String> of UIDs, fill out name and email
+        for(final String uid : uids) {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if(user != null) {
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("UsersInformation");
+                ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                            if (ds.getKey().equals(uid)) {
+                                userNameList.add(ds.child("name").getValue(String.class));
+                                userEmailList.add(ds.child("email").getValue(String.class));
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }
+    }
+
     // DatePicker accessory method
     public void extractDate(int year, int month, int day) {
         dyear = year;
         dmonth = month + 1;
         dday = day;
-        Toast.makeText(getContext(), "Date: " + dmonth + "/" + dday + "/" + dyear, Toast.LENGTH_SHORT).show();
     }
 
     // TimePicker accessory method
     public void extractTime(int hour, int minute) {
         thour = hour;
         tminute = minute;
-        Toast.makeText(getContext(), "Time: " + thour + ":" + tminute, Toast.LENGTH_SHORT).show();
     }
 
     private void getUserName() {
@@ -250,9 +291,7 @@ public class CreatePlaydateFragment extends Fragment {
         AlertDialog.Builder chooseUserDialog = new AlertDialog.Builder(getContext());
         chooseUserDialog.setTitle("Invite: ");
 
-        // CAN USE CURSOR W/ ARRAYDAPTER FOR DB
         final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.select_dialog_singlechoice, userNameList);
-
 
         chooseUserDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
@@ -265,6 +304,7 @@ public class CreatePlaydateFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int index) {
                 addUserToPlaydate(index);
+                hideInviteButton();
             }
         });
         chooseUserDialog.show();
@@ -273,10 +313,15 @@ public class CreatePlaydateFragment extends Fragment {
     private void addUserToPlaydate(int index) {
         String userEmail = userEmailList.get(index);
         String userName = userNameList.get(index);
+        //String userUID = userUIDList.get(index);
+        chosenUserIndex = index;
 
-        cpInviteList.setText(cpInviteList.getText().toString() + userName + " ");
-        // add to backend list to create Playdate
-        inviteList.add(userEmail);
+        //cpInviteList.setText(cpInviteList.getText().toString() + userName + " ");
+        cpInviteList.setText("tnANrHrfHtQmQi4mYkBG5loAt113");
+    }
+
+    private void hideInviteButton() {
+        buttonInvite.setVisibility(View.INVISIBLE);
     }
 
     private void createPlaydate() {
@@ -285,8 +330,12 @@ public class CreatePlaydateFragment extends Fragment {
         meetingLocation.setLatitude(37.3503);
         meetingLocation.setLongitude(-121.9607);
 
+        float latitude = 37.3503f;
+        float longitude = -121.9607f;
+
         // check for empty fields
-        if(dyear == -1 || thour == -1 || inviteList.size() == 0  || meetingLocation == null) {
+        if(dyear == -1 || thour == -1 || cpInviteList.getText().toString().isEmpty()  || meetingLocation == null
+                || inputLat.getText().toString().isEmpty() || inputLon.getText().toString().isEmpty()) {
             AlertDialog.Builder alert = new AlertDialog.Builder(getContext());
             alert.setTitle("Error");
             alert.setMessage("You must fill out all fields to continue");
@@ -299,17 +348,34 @@ public class CreatePlaydateFragment extends Fragment {
             alert.show();
         }
         else {
-            Date dt = new Date(dyear-1900, dmonth, dday, thour, tminute);
+            String m, d, hr, min;
+            Date date = new Date();
+            m = (dmonth < 10) ? "0"+ (Integer.toString(dmonth)) : Integer.toString(dmonth);
+            d = (dday < 10) ? "0"+ Integer.toString(dday) : Integer.toString(dday);
+            hr = (thour < 10) ? "0"+ Integer.toString(thour) : Integer.toString(thour);
+            min = (tminute < 10) ? "0"+ Integer.toString(tminute) : Integer.toString(tminute);
+            String dt = dyear + "-" + m + "-" + d + " " + hr + ":" + min;
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            try {
+                date = format.parse(dt);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
 
-            Playdate pd = new Playdate(inviteList, dt, meetingLocation);
+            latitude = Float.parseFloat(inputLat.getText().toString());
+            longitude = Float.parseFloat(inputLon.getText().toString());
+
+            //Playdate pd = new Playdate(new PDAttendee(myUID), new PDAttendee(userUIDList.get(chosenUserIndex)), date, latitude, longitude);
+            Playdate pd = new Playdate(new PDAttendee(myUID), new PDAttendee("tnANrHrfHtQmQi4mYkBG5loAt113"), date, latitude, longitude);
+
             /*
-                TODO: save playdate to local storage DB (sqlite)
-                    add playdate to local calendar app
-                    send notification to other users on playdate to schedule
-                    add playdate to other users local calendar app
+                TODO: save playdate to firebase
+
              */
-            addPlaydateToDeviceCalendar(pd);
-            savePlaydateToSQLiteDB(pd);
+            //addPlaydateToDeviceCalendar(pd);
+            SQLiteManager dbManager = new SQLiteManager(getContext(), userName);
+            int x = dbManager.addPlaydate(pd, getContext());
+            Log.d("mypd", "create pd: " + Integer.toString(x));
             navToMyPlaydates();
         }
     }
@@ -317,22 +383,29 @@ public class CreatePlaydateFragment extends Fragment {
     private void addPlaydateToDeviceCalendar(Playdate pd) {
         Intent calIntent = new Intent(Intent.ACTION_INSERT);
         calIntent.setType("vnd.android.cursor.item/event");
-        calIntent.putExtra(CalendarContract.Events.TITLE, "Doggie Playdate");
+        calIntent.putExtra(CalendarContract.Events.TITLE, "Doggie Playdate w/ " + pd.user2.name);
         calIntent.putExtra(CalendarContract.Events.EVENT_LOCATION, "SOME LOCATION");
         calIntent.putExtra(CalendarContract.Events.DESCRIPTION, "Doggie Playdate");
-
+/*
         GregorianCalendar calDate = new GregorianCalendar(dyear, dmonth, dday, thour, tminute);
 
         calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
                 calDate.getTimeInMillis());
         calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
                 calDate.getTimeInMillis()+(30*60000));
+*/
+        Calendar cal = Calendar.getInstance();
+        cal.set(dyear, dmonth, dday, thour, tminute);
+        calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
+                cal.getTimeInMillis());
+        calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+                cal.getTimeInMillis()+(30*60000));
 
         startActivity(calIntent);
     }
   
     private void savePlaydateToSQLiteDB(Playdate pd) {
-        SQLiteManager dbManager = new SQLiteManager(getContext());
+        SQLiteManager dbManager = new SQLiteManager(getContext(), userName);
         dbManager.addPlaydate(pd, getContext());
     }
 

@@ -6,10 +6,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class SQLiteManager extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "DoggiePlaydate";
@@ -33,8 +37,9 @@ public class SQLiteManager extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sql = "CREATE TABLE IF NOT EXISTS Playdates(" +
+        String sql = "CREATE TABLE IF NOT EXISTS " + uname + "_Playdates(" +
                 "_id integer primary key autoincrement," +
+                "user2UID text," +
                 "date text, " +
                 "latitude real, " +
                 "longitude real)";
@@ -63,23 +68,34 @@ public class SQLiteManager extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addPlaydate(Playdate pd, Context con) {
+    public int addPlaydate(Playdate pd, Context con) {
 
 
         SQLiteDatabase db = getWritableDatabase();
 
+        String sql = "CREATE TABLE IF NOT EXISTS " + uname + "_Playdates(" +
+                "_id integer primary key autoincrement," +
+                "user2UID text," +
+                "date text, " +
+                "latitude real, " +
+                "longitude real)";
+
+        db.execSQL(sql);
+
         ContentValues cv = new ContentValues();
+        //cv.put("user2UID", pd.user2.uid);
+        cv.put("user2UID", "tnANrHrfHtQmQi4mYkBG5loAt113");
         cv.put("date", pd.dateToDBString());
-        cv.put("latitude", pd.meetingPlace.getLatitude());
-        cv.put("longitude", pd.meetingPlace.getLongitude());
-        int lastIndex = (int) db.insert("Playdates", null, cv);
+        cv.put("latitude", pd.latitude);
+        cv.put("longitude", pd.longitude);
+        return (int) db.insert(uname + "_Playdates", null, cv);
 /*
         // get index of last row to correctly create PDx table holding users
         String query = "SELECT max(_id) from Playdates";
         Cursor c = db.rawQuery(query, null);
         c.moveToFirst();
         int index = c.getInt(c.getColumnIndexOrThrow("max(_id)"));
-  */
+
         Toast t = Toast.makeText(con, "index of last row in playdates: " + lastIndex, Toast.LENGTH_SHORT);
         t.setGravity(Gravity.CENTER,0,0);
         t.show();
@@ -98,6 +114,7 @@ public class SQLiteManager extends SQLiteOpenHelper {
             cv1.put("user", pd.attendees.get(x));
             int success = (int) db.insert("PD" + lastIndex, null, cv1);
         }
+        */
 
     }
 
@@ -109,28 +126,65 @@ public class SQLiteManager extends SQLiteOpenHelper {
 
     public boolean deletePlaydateTable(int pdId) {
         SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("DROP TABLE IF EXISTS PD" + pdId);
+        db.execSQL("DROP TABLE IF EXISTS " + uname + "_Playdates" + pdId);
         return true;
     }
 
-    public Cursor getAllPlaydates() {
-        SQLiteDatabase db = getReadableDatabase();
+    public ArrayList<Playdate> getAllPlaydates() {
+        /*SQLiteDatabase db = getReadableDatabase();
         Cursor c;
         try {
-            c = db.rawQuery("SELECT * FROM Playdates ORDER BY date ASC", null);
+            c = db.rawQuery("SELECT * FROM " + uname +
+                    "_Playdates ORDER BY date ASC", null);
             return c;
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return null;
+        */
+        ArrayList<Playdate> pds = new ArrayList<>();
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = null;
+        try {
+            c = db.rawQuery("SELECT * FROM " + uname + "_Playdates ORDER BY date ASC", null);
+        } catch (Exception e) {
+            c = null;
+            e.printStackTrace();
+        }
+        finally {
+            if (c != null) {
+                if (c.moveToFirst()) {
+                    do {
+                        String user2uid = c.getString(c.getColumnIndexOrThrow("user2UID"));
+                        PDAttendee temp = PDAttendee.newAttendee(user2uid);
+                        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                        Date date = new Date();
+                        try {
+                            date = df.parse(c.getString(c.getColumnIndexOrThrow("date")));
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        float latitude = c.getFloat(c.getColumnIndexOrThrow("latitude"));
+                        float longitude = c.getFloat(c.getColumnIndexOrThrow("longitude"));
+                        pds.add(new Playdate(new PDAttendee("blah"), temp, date, latitude, longitude));
+                    } while (c.moveToNext());
+                    c.close();
+                    return pds;
+                }
+            }
+        }
+        return pds;
     }
 
     public Cursor getPlaydatesAfter(String todaysDateDBString) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor c;
         try {
-            c = db.rawQuery("SELECT * FROM Playdates WHERE date>=" + todaysDateDBString + " ORDER BY date(date) ASC", null);
+            c = db.rawQuery("SELECT * FROM " + uname +
+                    "_Playdates WHERE date>=" + todaysDateDBString +
+                    " ORDER BY date(date) ASC", null);
             return c;
         } catch (Exception e) {
             e.printStackTrace();

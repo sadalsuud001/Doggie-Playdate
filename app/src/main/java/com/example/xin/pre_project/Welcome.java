@@ -109,7 +109,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         com.google.android.gms.location.LocationListener  {
 
     //message part variables init
-    Button btnMessage, btncreatePlaydate;
+    Button btnMessage, btnCreatePlaydate;
     final private String testUid = "MyvsPO4Zj7YvQxQaL4jqyBjnX7I2";
     private String target_id = "34";
 
@@ -273,6 +273,19 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
             }
         });
 
+        btnCreatePlaydate = findViewById(R.id.btnCreatePlaydate);
+        btnCreatePlaydate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationView.getMenu().getItem(navItemIndex).setChecked(false);
+                navItemIndex = 2;
+                selectNavMenu(navItemIndex);
+                Intent go1 = new Intent(Welcome.this, HomeActivity.class);
+                go1.putExtra("navItemIndex", 2);
+                go1.putExtra("username", userName);
+                startActivityForResult(go1, 0);
+            }
+        });
 
 
         toolbar = findViewById(R.id.toolbar);

@@ -527,6 +527,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                             case R.id.action_logout:
                                 Toast.makeText(getApplicationContext(), "Logging out..", Toast.LENGTH_SHORT).show();
                                 FirebaseAuth.getInstance().signOut();
+                                Intent goToLogin = new Intent(Welcome.this, MainActivity.class);
+                                startActivity(goToLogin);
                                 finish();
                                 break;
                             default:
@@ -569,6 +571,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                 CURRENT_TAG = TAG_HOME;
             }
             if (resultCode == Activity.RESULT_CANCELED) {
+                Intent goToLogin = new Intent(Welcome.this, MainActivity.class);
+                startActivity(goToLogin);
                 finish();
             }
         }

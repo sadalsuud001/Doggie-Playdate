@@ -352,15 +352,11 @@ public class HomeActivity extends AppCompatActivity
                                 navToFragment(fragment);
                                 break;
                             case R.id.action_logout:
-                                /*
-                                    TODO: Log user out. Any DB calls? Any write to disk?
-                                */
-                                // GO TO LOGIN SCREEN
-                                Toast.makeText(getApplicationContext(), "Log out user", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "Logging out..", Toast.LENGTH_SHORT).show();
                                 FirebaseAuth.getInstance().signOut();
                                 Intent returnIntent1 = new Intent();
                                 setResult(Activity.RESULT_CANCELED, returnIntent1);
-                                //finish();
+                                finish();
 
                                 break;
                             default:

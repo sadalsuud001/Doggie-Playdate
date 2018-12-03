@@ -30,12 +30,7 @@ public class MyFirebaseMessaging extends FirebaseMessagingService{
         Log.d("EDMTDEV",remoteMessage.getNotification().getBody());
         //Because I will send the Firbase message with contain lat and lng from Rider app
         //So I need convert message to LatLng
-        LatLng customer_location = new Gson().fromJson(remoteMessage.getNotification().getBody(),LatLng.class);
-        Intent intent  = new Intent(getBaseContext(), CustomerCall.class);
-        intent.putExtra("lat",customer_location.latitude);
-        intent.putExtra("lng",customer_location.longitude);
-        intent.putExtra("customer",remoteMessage.getNotification().getTitle());
-        startActivity(intent);
+
     }
     */
 
@@ -68,6 +63,13 @@ public class MyFirebaseMessaging extends FirebaseMessagingService{
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 openRateActivity(remoteMessage.getNotification().getBody());
             }
+        } else {
+            LatLng customer_location = new Gson().fromJson(remoteMessage.getNotification().getBody(),LatLng.class);
+            Intent intent  = new Intent(getBaseContext(), CustomerCall.class);
+            intent.putExtra("lat",customer_location.latitude);
+            intent.putExtra("lng",customer_location.longitude);
+            intent.putExtra("customer",remoteMessage.getNotification().getTitle());
+            startActivity(intent);
         }
     }
 

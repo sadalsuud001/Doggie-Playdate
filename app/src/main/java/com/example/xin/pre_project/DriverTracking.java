@@ -170,7 +170,9 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
                     public void onKeyEntered(String key, GeoLocation location) {
                         //Because here we will need customer Id (rider Id) to send notification
                         //so, we will pass it from previous activity (CustomerCall)
-                        sendArrivedNotification(customerId);
+                        if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(key)) {
+                            sendArrivedNotification(customerId);
+                        }
                     }
 
                     @Override

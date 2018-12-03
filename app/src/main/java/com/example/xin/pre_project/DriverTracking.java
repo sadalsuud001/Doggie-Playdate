@@ -193,16 +193,13 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
 
                     }
                 });
-
-
-
-
     }
     //driver App part 13 9:40
     private void sendArrivedNotification(String customerId) {
         Token token = new Token(customerId);
         //We will send notification with title is Arrived and body is this string.
-        Notification notification = new Notification("Arrived",String.format("Your friend has arrived at your location"));
+        Notification notification = new Notification("Arrived",String.format("Your friend '" +
+                        FirebaseAuth.getInstance().getCurrentUser().getEmail() + "' has arrived at your location"));
         Sender sender = new Sender(token.getToken(),notification);
 
         mFCMService.sendMessage(sender).enqueue(new Callback<FCMResponse>() {

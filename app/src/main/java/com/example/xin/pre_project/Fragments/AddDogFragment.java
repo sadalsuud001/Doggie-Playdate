@@ -67,7 +67,7 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
 
     String name, breed;
     int gender, year, month, day;
-    String userName = "";
+    String userName;
 
     Button addDog;
 
@@ -88,7 +88,13 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_dog, container, false);
         bindViews(view);
-
+        Bundle bd = getArguments();
+        if(bd != null) {
+            userName = bd.getString("username");
+        }
+        else {
+            getUserName();
+        }
 
         return view;
     }
@@ -108,6 +114,8 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
     private void bindViews(View view) {
         addDogEditName = view.findViewById(R.id.addDogEditName);
         addDogBreed = view.findViewById(R.id.addDogEditBreed);
+
+        getUserName();
 
         /*
             BIRTHDAY DATE PICKER
@@ -202,65 +210,62 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
 
                 name = addDogEditName.getText().toString();
                 breed = addDogBreed.getText().toString();
-                if(name.isEmpty() || breed.isEmpty()) {
+                String bday = chooseBirthday.getText().toString();
+                if(name.isEmpty() || breed.isEmpty() || bday.isEmpty()) {
                     Toast t2 = Toast.makeText(getContext(), "You must fill out all fields", Toast.LENGTH_SHORT);
                     t2.setGravity(Gravity.CENTER, 0,0);
                     t2.show();
                 }
                 else {
-
-
                     // save dog photo to local storage
-                    ImageManager im = new ImageManager(HomeActivity.gContext);
+                    ImageManager im = new ImageManager(HomeActivity.gContext, userName);
                     Bitmap dogBitmap = ((BitmapDrawable)dogPic.getDrawable()).getBitmap();
                     picPath = im.saveToInternalStorage(dogBitmap, name);
-                    Log.d("PICPATH-ad", picPath);
 
                     Dog newDog = new Dog(name, breed, genderSelectedRadioId, sizeSelectedRadioId, year, month, day, picPath);
-                    SQLiteManager db = new SQLiteManager(getContext());
-                    db.addDog("a", newDog);
+                    SQLiteManager db = new SQLiteManager(getContext(), userName);
+                    int result = (int)db.addDog(newDog);
 
-                    /*
-                    // get user's name
-                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                    if(user != null) {
-                        String uid = user.getUid();
-                        String email = user.getEmail();
-
-                        /*
-                            TODO: get user's name from Firebase
-
-                        DatabaseReference fb = FirebaseDatabase.getInstance().getReference().child("UsersInformation").child(uid);
-                        fb.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                String s = dataSnapshot.child("name").getValue(String.class);
-                                Log.d("TAG", s);
-                                setUserName(s);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
-
-                        switch((int)db.addDog(userName, newDog)) {
-                            case -1: Toast t = Toast.makeText(getContext(), "Error adding " + name + " to Dogs List", Toast.LENGTH_SHORT);
-                                t.setGravity(Gravity.CENTER, 0,0);
-                                t.show();
-                                break;
-                            default: Toast t1 = Toast.makeText(getContext(), "Added " + name + " to Dogs List", Toast.LENGTH_SHORT);
-                                t1.setGravity(Gravity.CENTER, 0,0);
-                                t1.show();
-                                break;
-                        }
-                        */
+                    switch(result) {
+                        case -1: Toast t = Toast.makeText(getContext(), "Error adding " + name + " to Dogs List", Toast.LENGTH_SHORT);
+                            t.setGravity(Gravity.CENTER, 0,0);
+                            t.show();
+                            break;
+                        default: Toast t1 = Toast.makeText(getContext(), "Added " + name + " to Dogs List", Toast.LENGTH_SHORT);
+                            t1.setGravity(Gravity.CENTER, 0,0);
+                            t1.show();
+                            break;
+                    }
                     mCallback.navToProfile();
                 }
 
             }
         });
+    }
+
+    private void getUserName() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null) {
+            final String uid = user.getUid();
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("UsersInformation");
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                        if (ds.getKey().equals(uid)) {
+                            String name = ds.child("name").getValue(String.class);
+                            setUserName(name);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     private void setUserName(String name) {

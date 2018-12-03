@@ -80,6 +80,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.SquareCap;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -239,6 +240,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     public static String CURRENT_TAG = TAG_HOME;
     private Fragment fragment;
 
+    private String userName;
+
 
     //Send Alert
     IFCMService mFCMService; //33:45
@@ -246,6 +249,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_nav_drawer);
+
+        getUserName();
 
         mFCMService = Common.getFCMService();
         // restore location_switch position
@@ -282,8 +287,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
          */
         setUnreadMessages(false);
 
-        //if(drawer != null)
-            setUpNavigationView();
+        setUpNavigationView();
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -481,6 +485,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 selectNavMenu(navItemIndex);
                                 Intent go0 = new Intent(Welcome.this, HomeActivity.class);
                                 go0.putExtra("navItemIndex", 1);
+                                go0.putExtra("username", userName);
                                 startActivityForResult(go0, 0);
                                 break;
                             case R.id.navI_makeplaydate:
@@ -489,6 +494,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 selectNavMenu(navItemIndex);
                                 Intent go1 = new Intent(Welcome.this, HomeActivity.class);
                                 go1.putExtra("navItemIndex", 2);
+                                go1.putExtra("username", userName);
                                 startActivityForResult(go1, 0);
                                 break;
                             case R.id.navI_playdates:
@@ -497,6 +503,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 selectNavMenu(navItemIndex);
                                 Intent go2 = new Intent(Welcome.this, HomeActivity.class);
                                 go2.putExtra("navItemIndex", 3);
+                                go2.putExtra("username", userName);
                                 startActivityForResult(go2, 0);
                                 break;
                             case R.id.navI_userprofile:
@@ -505,6 +512,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 selectNavMenu(navItemIndex);
                                 Intent go = new Intent(Welcome.this, HomeActivity.class);
                                 go.putExtra("navItemIndex", 4);
+                                go.putExtra("username", userName);
                                 startActivityForResult(go, 0);
                                 break;
                             case R.id.navI_settings:
@@ -513,21 +521,13 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                 selectNavMenu(navItemIndex);
                                 Intent go3 = new Intent(Welcome.this, HomeActivity.class);
                                 go3.putExtra("navItemIndex", 5);
+                                go3.putExtra("username", userName);
                                 startActivityForResult(go3, 0);
                                 break;
                             case R.id.action_logout:
-                                /*
-                                    TODO: Change to Logout user
-                                */
-                                // GO TO LOGIN SCREEN
-                                Toast.makeText(getApplicationContext(), "Log out user", Toast.LENGTH_SHORT).show();
-                                navigationView.getMenu().getItem(navItemIndex).setChecked(false);
-
-                                navItemIndex = 6;
-                                selectNavMenu(navItemIndex);
-                                Intent go4 = new Intent(Welcome.this, HomeActivity.class);
-                                go4.putExtra("navItemIndex", 6);
-                                startActivityForResult(go4, 0);
+                                Toast.makeText(getApplicationContext(), "Logging out..", Toast.LENGTH_SHORT).show();
+                                FirebaseAuth.getInstance().signOut();
+                                finish();
                                 break;
                             default:
                                 navItemIndex = 0;
@@ -569,7 +569,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                 CURRENT_TAG = TAG_HOME;
             }
             if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
+                finish();
             }
         }
     }
@@ -1093,12 +1093,42 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         super.onConfigurationChanged(newConfig);
     }
 
+
+    private void getUserName() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null) {
+            final String uid = user.getUid();
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("UsersInformation");
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                        if (ds.getKey().equals(uid)) {
+                            String name = ds.child("name").getValue(String.class);
+                            setUserName(name);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    private void setUserName(String name) {
+        userName = name;
+
     private void removeOtherUserMarkers()
     {
         for (int i = 0; i < mOtherUserMarkers.size(); ++i) {
             mOtherUserMarkers.get(i).remove();
         }
         mOtherUserMarkers.clear();
+
     }
 
 }

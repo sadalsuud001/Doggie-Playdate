@@ -27,6 +27,7 @@ import com.example.xin.pre_project.Fragments.CreatePlaydateFragment;
 import com.example.xin.pre_project.Fragments.MessagingFragment;
 import com.example.xin.pre_project.Fragments.MyPlaydatesFragment;
 import com.example.xin.pre_project.Fragments.ProfileFragment;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class HomeActivity extends AppCompatActivity
 
@@ -57,6 +58,8 @@ public class HomeActivity extends AppCompatActivity
 
     private Fragment fragment;
     public static String CURRENT_TAG = TAG_HOME;
+
+    private String userName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,14 +156,19 @@ public class HomeActivity extends AppCompatActivity
         }
         else if(b != null) {
             navItemIndex = b.getInt("navItemIndex", 1);
+            userName = b.getString("username", "");
             switch (navItemIndex) {
                 case 1:
                     CURRENT_TAG = TAG_MESSAGING;
                     selectNavMenu(navItemIndex);
                     setToolbarTitle(1);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if (fragment == null)
+                    if (fragment == null) {
                         fragment = new MessagingFragment();
+                        b = new Bundle();
+                        b.putString("username", userName);
+                        fragment.setArguments(b);
+                    }
                     navToFragment(fragment);
                     break;
                 case 2:
@@ -168,8 +176,12 @@ public class HomeActivity extends AppCompatActivity
                     selectNavMenu(navItemIndex);
                     setToolbarTitle(2);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if (fragment == null)
+                    if (fragment == null) {
                         fragment = new CreatePlaydateFragment();
+                        b = new Bundle();
+                        b.putString("username", userName);
+                        fragment.setArguments(b);
+                    }
                     navToFragment(fragment);
                     break;
                 case 3:
@@ -177,8 +189,12 @@ public class HomeActivity extends AppCompatActivity
                     selectNavMenu(navItemIndex);
                     setToolbarTitle(3);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if (fragment == null)
+                    if (fragment == null) {
                         fragment = new MyPlaydatesFragment();
+                        b = new Bundle();
+                        b.putString("username", userName);
+                        fragment.setArguments(b);
+                    }
                     navToFragment(fragment);
                     break;
                 case 4:
@@ -186,8 +202,12 @@ public class HomeActivity extends AppCompatActivity
                     selectNavMenu(navItemIndex);
                     setToolbarTitle(4);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if (fragment == null)
+                    if (fragment == null) {
                         fragment = new ProfileFragment();
+                        b = new Bundle();
+                        b.putString("username", userName);
+                        fragment.setArguments(b);
+                    }
                     navToFragment(fragment);
                     break;
                 case 5:
@@ -195,8 +215,12 @@ public class HomeActivity extends AppCompatActivity
                     selectNavMenu(navItemIndex);
                     setToolbarTitle(5);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if (fragment == null)
+                    if (fragment == null) {
                         fragment = new AccountSettingsFragment();
+                        b = new Bundle();
+                        b.putString("username", userName);
+                        fragment.setArguments(b);
+                    }
                     navToFragment(fragment);
                     break;
                 case 6:
@@ -204,8 +228,12 @@ public class HomeActivity extends AppCompatActivity
                     selectNavMenu(navItemIndex);
                     setToolbarTitle(6);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if (fragment == null)
+                    if (fragment == null) {
                         fragment = new AddDogFragment();
+                        b = new Bundle();
+                        b.putString("username", userName);
+                        fragment.setArguments(b);
+                    }
                     navToFragment(fragment);
                     break;
                 default:
@@ -213,8 +241,12 @@ public class HomeActivity extends AppCompatActivity
                     selectNavMenu(navItemIndex);
                     setToolbarTitle(3);
                     fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if (fragment == null)
+                    if (fragment == null) {
                         fragment = new MyPlaydatesFragment();
+                        b = new Bundle();
+                        b.putString("username", userName);
+                        fragment.setArguments(b);
+                    }
                     navToFragment(fragment);
                     break;
             }
@@ -255,8 +287,12 @@ public class HomeActivity extends AppCompatActivity
                                 selectNavMenu(navItemIndex);
                                 setToolbarTitle(1);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                                if(fragment == null)
+                                if(fragment == null) {
                                     fragment = new MessagingFragment();
+                                    b = new Bundle();
+                                    b.putString("username", userName);
+                                    fragment.setArguments(b);
+                                }
                                 navToFragment(fragment);
                                 break;
                             case R.id.navI_makeplaydate:
@@ -265,8 +301,12 @@ public class HomeActivity extends AppCompatActivity
                                 selectNavMenu(navItemIndex);
                                 setToolbarTitle(2);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                                if(fragment == null)
+                                if(fragment == null) {
                                     fragment = new CreatePlaydateFragment();
+                                    b = new Bundle();
+                                    b.putString("username", userName);
+                                    fragment.setArguments(b);
+                                }
                                 navToFragment(fragment);
                                 break;
                             case R.id.navI_playdates:
@@ -275,8 +315,12 @@ public class HomeActivity extends AppCompatActivity
                                 selectNavMenu(navItemIndex);
                                 setToolbarTitle(3);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                                if(fragment == null)
+                                if(fragment == null) {
                                     fragment = new MyPlaydatesFragment();
+                                    b = new Bundle();
+                                    b.putString("username", userName);
+                                    fragment.setArguments(b);
+                                }
                                 navToFragment(fragment);
                                 break;
                             case R.id.navI_userprofile:
@@ -285,8 +329,12 @@ public class HomeActivity extends AppCompatActivity
                                 selectNavMenu(navItemIndex);
                                 setToolbarTitle(4);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                                if(fragment == null)
+                                if(fragment == null) {
                                     fragment = new ProfileFragment();
+                                    b = new Bundle();
+                                    b.putString("username", userName);
+                                    fragment.setArguments(b);
+                                }
                                 navToFragment(fragment);
                                 break;
                             case R.id.navI_settings:
@@ -295,8 +343,12 @@ public class HomeActivity extends AppCompatActivity
                                 selectNavMenu(navItemIndex);
                                 setToolbarTitle(5);
                                 fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                                if(fragment == null)
+                                if(fragment == null) {
                                     fragment = new AccountSettingsFragment();
+                                    b = new Bundle();
+                                    b.putString("username", userName);
+                                    fragment.setArguments(b);
+                                }
                                 navToFragment(fragment);
                                 break;
                             case R.id.action_logout:
@@ -305,14 +357,11 @@ public class HomeActivity extends AppCompatActivity
                                 */
                                 // GO TO LOGIN SCREEN
                                 Toast.makeText(getApplicationContext(), "Log out user", Toast.LENGTH_SHORT).show();
-                                navItemIndex = 6;
+                                FirebaseAuth.getInstance().signOut();
+                                Intent returnIntent1 = new Intent();
+                                setResult(Activity.RESULT_CANCELED, returnIntent1);
+                                //finish();
 
-                                CURRENT_TAG = TAG_ADDDOG;
-                                selectNavMenu(navItemIndex);
-                                fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                                if(fragment == null)
-                                    fragment = new AddDogFragment();
-                                navToFragment(fragment);
                                 break;
                             default:
                                 navItemIndex = 0;
@@ -429,9 +478,10 @@ public class HomeActivity extends AppCompatActivity
     // Implement ReturnToProfile interface
     public void navToProfile() {
         CURRENT_TAG = TAG_PROFILE;
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_PROFILE);
-        if(fragment == null)
-            fragment = new ProfileFragment();
+        Fragment fragment = new ProfileFragment();
+            Bundle bd = new Bundle();
+            bd.putString("username", userName);
+            fragment.setArguments(bd);
         navToFragment(fragment);
     }
 }

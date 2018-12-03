@@ -29,6 +29,13 @@ import com.example.xin.pre_project.HomeActivity;
 import com.example.xin.pre_project.ImageManager;
 import com.example.xin.pre_project.R;
 import com.example.xin.pre_project.SQLiteManager;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -47,6 +54,7 @@ public class AccountSettingsFragment extends Fragment implements Spinner.OnItemS
     ArrayList<String> dogs;
     int userStatus = 0;
     int indexOfDogToRemove = 0;
+    String userName;
 
     private static final int CAMERA_REQUEST = 1888;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
@@ -77,7 +85,15 @@ public class AccountSettingsFragment extends Fragment implements Spinner.OnItemS
         cancelRemoveDog = view.findViewById(R.id.buttonCancelRemoveDog);
         tvNoDogs = view.findViewById(R.id.tvNoDogs);
 
-        ImageManager im = new ImageManager(HomeActivity.gContext);
+        Bundle bd = getArguments();
+        if(bd != null) {
+            userName = bd.getString("username");
+        }
+        else {
+            getUserName();
+        }
+
+        ImageManager im = new ImageManager(HomeActivity.gContext, userName);
         Bitmap b = im.loadFromStorage("");
         if(b != null)
             profilePic.setImageBitmap(b);
@@ -156,8 +172,8 @@ public class AccountSettingsFragment extends Fragment implements Spinner.OnItemS
                 t.show();
 
                 String dogName = dogs.get(indexOfDogToRemove);
-                SQLiteManager db = new SQLiteManager(getContext());
-                db.removeDog("a", dogName);
+                SQLiteManager db = new SQLiteManager(getContext(), userName);
+                db.removeDog(dogName);
 
                 dogs.remove(indexOfDogToRemove);
 
@@ -184,6 +200,35 @@ public class AccountSettingsFragment extends Fragment implements Spinner.OnItemS
         return view;
     }
 
+    private void getUserName() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null) {
+            final String uid = user.getUid();
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("UsersInformation");
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                        if (ds.getKey().equals(uid)) {
+                            String name = ds.child("name").getValue(String.class);
+                            setUserName(name);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    private void setUserName(String name) {
+        userName = name;
+    }
+
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         // user status spinner
@@ -206,8 +251,8 @@ public class AccountSettingsFragment extends Fragment implements Spinner.OnItemS
     }
 
     public void updateDogData() {
-        SQLiteManager db = new SQLiteManager(getContext());
-        ArrayList<Dog>  myDogs = db.getAllDogs("a");
+        SQLiteManager db = new SQLiteManager(getContext(),userName);
+        ArrayList<Dog>  myDogs = db.getAllDogs();
         dogs = new ArrayList<>();
         for(Dog d : myDogs) {
             dogs.add(d.name);
@@ -253,7 +298,7 @@ public class AccountSettingsFragment extends Fragment implements Spinner.OnItemS
         if(requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             photo = (Bitmap) data.getExtras().get("data");
             profilePic.setImageBitmap(photo);
-            ImageManager im = new ImageManager(HomeActivity.gContext);
+            ImageManager im = new ImageManager(HomeActivity.gContext, userName);
             im.saveToInternalStorage(photo);
         }
 
@@ -262,7 +307,7 @@ public class AccountSettingsFragment extends Fragment implements Spinner.OnItemS
             try {
                 photo = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
                 profilePic.setImageBitmap(photo);
-                ImageManager im = new ImageManager(getContext());
+                ImageManager im = new ImageManager(getContext(), userName);
                 im.saveToInternalStorage(photo);
             } catch (FileNotFoundException e) {
                 Toast.makeText(getContext(), "Error saving file", Toast.LENGTH_SHORT).show();

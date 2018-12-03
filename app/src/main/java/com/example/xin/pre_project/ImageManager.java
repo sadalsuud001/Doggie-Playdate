@@ -21,20 +21,21 @@ import java.io.IOException;
 public class ImageManager {
 
     private Context context;
+    private String uname;
 
-    public ImageManager(Context context) {
+    public ImageManager(Context context, String userName) {
         this.context = context;
+        if(userName != null)
+            this.uname = userName.replaceAll(" ", "_");
     }
 
     // overloaded for User Profile pic
     public Bitmap loadFromStorage(String path) {
         try {
             ContextWrapper cw = new ContextWrapper(HomeActivity.gContext);
-            // path to /data/user/0/com.example.xin.pre_project/app_imageDir
             File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-            File f=new File(directory, "profile.jpg");
-            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-            return b;
+            File f=new File(directory, uname + ".jpg");
+            return BitmapFactory.decodeStream(new FileInputStream(f));
         }
         catch (FileNotFoundException e)
         {
@@ -49,10 +50,8 @@ public class ImageManager {
     // overloaded for User Profile pic
     public String saveToInternalStorage(Bitmap bitmapImage){
         ContextWrapper cw = new ContextWrapper(HomeActivity.gContext);
-        // path to /data/user/0/com.example.xin.pre_project/app_imageDir
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        // Create imageDir
-        File mypath = new File(directory, "profile.jpg");
+        File mypath = new File(directory, uname + ".jpg");
         String picPath = mypath.getParentFile().getPath();
 
         FileOutputStream fos = null;
@@ -76,12 +75,10 @@ public class ImageManager {
 
     // overloaded for Dog profile pics
     public Bitmap loadFromStorage(String path, String dogName) {
-        String fileName = "a_" + dogName + ".jpg";
+        String fileName = uname + "_" + dogName + ".jpg";
         try {
             File f=new File(path, fileName);
-            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-
-            return b;
+            return BitmapFactory.decodeStream(new FileInputStream(f));
         } catch (FileNotFoundException e) {
             Toast t = Toast.makeText(context, "Error - file not found", Toast.LENGTH_LONG);
             t.setGravity(Gravity.CENTER, 0, 0);
@@ -97,7 +94,7 @@ public class ImageManager {
         ContextWrapper cw = new ContextWrapper(HomeActivity.gContext);
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
 
-        String filename = "a_" + dogName + ".jpg";
+        String filename = uname + "_" + dogName + ".jpg";
         File mypath=new File(directory,filename);
 
         FileOutputStream fos = null;
@@ -114,7 +111,6 @@ public class ImageManager {
                 e.printStackTrace();
             }
         }
-        Log.d("PICPATH-IM", directory.getAbsolutePath());
         return directory.getAbsolutePath();
     }
 }

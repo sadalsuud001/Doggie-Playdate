@@ -23,6 +23,11 @@ import com.example.xin.pre_project.R;
 import com.example.xin.pre_project.SQLiteManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -31,10 +36,10 @@ public class ProfileFragment extends Fragment {
     TextView tvUsername, tvEmail;
     RecyclerView rvDogs;
     FloatingActionButton fab;
-
     AddDogFAB mCallback;
-
     de.hdodenhof.circleimageview.CircleImageView profilePic;
+
+    String userName;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -53,10 +58,32 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         bindViews(view);
-        getAndSetUserInfo();
-        getAndSetDogs(null);
+        Bundle bd = getArguments();
+        if(bd != null) {
+            userName = bd.getString("username");
+        }
+        /*else {
+            getUserName();
+        }*/
+        setUserInfo();
+        getAndSetDogs();
 
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            userName = savedInstanceState.getString("username");
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString("username", userName);
     }
 
     @Override
@@ -89,18 +116,47 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-    private void getAndSetUserInfo() {
+    private void getUserName() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null) {
+            final String uid = user.getUid();
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("UsersInformation");
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                        if (ds.getKey().equals(uid)) {
+                            String name = ds.child("name").getValue(String.class);
+                            setUserName(name);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    private void setUserName(String name) {
+        userName = name;
+    }
+
+    private void setUserInfo() {
         // pull from firebase
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null) {
-            String uid = user.getUid();
             String email = user.getEmail();
-            String name;
 
-            //tvUsername.setText(name);
+            tvUsername.setText(userName);
             tvEmail.setText(email);
 
-            ImageManager im = new ImageManager(HomeActivity.gContext);
+            if(userName == null)
+                getUserName();
+            ImageManager im = new ImageManager(HomeActivity.gContext, userName);
             profilePic.setImageBitmap(im.loadFromStorage(""));
         }
         else {
@@ -110,10 +166,13 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    private void getAndSetDogs(String username) {
-        SQLiteManager db = new SQLiteManager(getContext());
-        ArrayList<Dog> dogs = db.getAllDogs("a");
-        DogRVAdapter dogAdapter = new DogRVAdapter(getContext(), dogs);
+
+    private void getAndSetDogs() {
+        if(userName == null)
+            getUserName();
+        SQLiteManager db = new SQLiteManager(getContext(), userName);
+        ArrayList<Dog> dogs = db.getAllDogs();
+        DogRVAdapter dogAdapter = new DogRVAdapter(getContext(), dogs, userName);
         rvDogs.setLayoutManager(new LinearLayoutManager(getActivity()));
         rvDogs.setAdapter(dogAdapter);
     }

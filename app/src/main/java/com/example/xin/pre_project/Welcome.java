@@ -205,6 +205,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     DatabaseReference drivers;
     GeoFire geoFire;
     Marker mCurrent;
+    ArrayList<Marker> mOtherUserMarkers = new ArrayList<Marker>();
     MaterialAnimatedSwitch location_switch;
     SupportMapFragment mapFragment;
     boolean location_switch_state = false;
@@ -317,6 +318,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                 else{
                     stopLocationUpdates();
                     mCurrent.remove();
+                    removeOtherUserMarkers();
                     mMap.clear();
                     location_switch_state = false;
                     Log.d("loc_switch", String.valueOf(location_switch_state));
@@ -326,7 +328,6 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                 }
             }
         });
-
 
         // Place API
         places = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
@@ -876,7 +877,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
 
                 final double latitude = Common.mLastLocation.getLatitude();
                 final double longtitude = Common.mLastLocation.getLongitude();
-
+                removeOtherUserMarkers();
                 // update to firebase
                 geoFire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                         new GeoLocation(latitude, longtitude),
@@ -885,6 +886,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                             public void onComplete(String key, DatabaseError error) {
                                 if (mCurrent != null)
                                     mCurrent.remove(); //remove already marker
+
                                 mCurrent = mMap.addMarker(new MarkerOptions()
                                         .position(new LatLng(latitude, longtitude))
                                         .title("Your Location"));
@@ -915,6 +917,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         GeoQuery geoQuery = gf.queryAtLocation(new GeoLocation(Common.mLastLocation.getLatitude(),Common.mLastLocation.getLongitude()),distance);
         geoQuery.removeAllListeners();
 
+        removeOtherUserMarkers();
+
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, final GeoLocation location) {
@@ -928,12 +932,13 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                         if (!FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(user.getEmail())) {
                             // add user to map
 
-                            mMap.addMarker(new MarkerOptions().
+                            Marker marker = mMap.addMarker(new MarkerOptions().
                                     position(new LatLng(location.latitude, location.longitude))
                                     .flat(true)
                                     .title(user.getName())
                                     .snippet("Phone: " + user.getPhone())
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.dog)));
+                            mOtherUserMarkers.add(marker);
                         }
 
                     }
@@ -1088,6 +1093,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         super.onConfigurationChanged(newConfig);
     }
 
+
     private void getUserName() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null) {
@@ -1115,6 +1121,14 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
 
     private void setUserName(String name) {
         userName = name;
+
+    private void removeOtherUserMarkers()
+    {
+        for (int i = 0; i < mOtherUserMarkers.size(); ++i) {
+            mOtherUserMarkers.get(i).remove();
+        }
+        mOtherUserMarkers.clear();
+
     }
 
 }

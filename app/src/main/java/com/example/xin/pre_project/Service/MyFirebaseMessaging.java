@@ -41,7 +41,15 @@ public class MyFirebaseMessaging extends FirebaseMessagingService{
 
     @Override
     public void onMessageReceived(final RemoteMessage remoteMessage){
-        if(remoteMessage.getNotification().getTitle().equals("Cancel")) {
+        if(remoteMessage.getNotification().getTitle().equals("Accepted")) {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MyFirebaseMessaging.this, "" + remoteMessage.getNotification().getBody(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else if(remoteMessage.getNotification().getTitle().equals("Cancel")) {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                 @Override
@@ -64,7 +72,7 @@ public class MyFirebaseMessaging extends FirebaseMessagingService{
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void showArrivedNotificationAPI26(String body) {
+    private void showArrivedNotificationAPI26(final String body) {
         PendingIntent contentIntent = PendingIntent.getActivities(getBaseContext(),
                 0, new Intent[]{new Intent()},PendingIntent.FLAG_ONE_SHOT);
 
@@ -72,7 +80,13 @@ public class MyFirebaseMessaging extends FirebaseMessagingService{
         Notification.Builder builder = notificationHelper.getDoggieNotification("Arrived",body,contentIntent,
                 RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         notificationHelper.getManager().notify(1,builder.build());
-
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(MyFirebaseMessaging.this, "" + body, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void openRateActivity(String body) {

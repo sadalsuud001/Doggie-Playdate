@@ -1121,6 +1121,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
 
     private void setUserName(String name) {
         userName = name;
+    }
 
     private void removeOtherUserMarkers()
     {

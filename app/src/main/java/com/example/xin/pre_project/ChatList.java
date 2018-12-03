@@ -23,16 +23,21 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.firebase.ui.database.SnapshotParser;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -41,9 +46,6 @@ public class ChatList extends AppCompatActivity {
     private RecyclerView mMessageRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
 
-    private DatabaseReference mFirebaseDatabaseReference;
-
-    private DatabaseReference mFirebaseChatDataRef;
 
     private FirebaseRecyclerAdapter<SingleChat, ChatsViewHolder>
             mFirebaseAdapter;
@@ -61,31 +63,34 @@ public class ChatList extends AppCompatActivity {
         }
     }
 
+    private Map<String, String> email_to_id = new HashMap<String, String>();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chats);
-        mMessageRecyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
+        mMessageRecyclerView = (RecyclerView) findViewById(R.id.conv_list);
         mLinearLayoutManager = new LinearLayoutManager(this);
         mLinearLayoutManager.setStackFromEnd(true);
         mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
 
-        String user_id = getIntent().getStringExtra("user_id");
-
-        mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference("chats/"+user_id+"/");
+        String path = "chats/"+FirebaseAuth.getInstance().getCurrentUser().getUid() +"/";
+        Log.d("Path: ", path);
+        Query mFirebaseDatabaseReference = FirebaseDatabase.getInstance()
+                .getReference(path).orderByChild("timestamp");
         SnapshotParser<SingleChat> parser = new SnapshotParser<SingleChat>() {
             @Override
             public SingleChat parseSnapshot(DataSnapshot dataSnapshot) {
-                return dataSnapshot.getValue(SingleChat.class);
+                SingleChat chat = dataSnapshot.getValue(SingleChat.class);
+                chat.setId(dataSnapshot.getKey());
+                chat.setId(dataSnapshot.getKey());
+                Log.d("aaaa", "key is: " + dataSnapshot.getKey());
+                return chat;
             }
         };
 
-        // New child entries for both users in chats table
-        mFirebaseChatDataRef = FirebaseDatabase.getInstance().getReference("chats/");
-
         // Construct child name.
-        String target_id = getIntent().getStringExtra("target_id");
-
         FirebaseRecyclerOptions<SingleChat> options =
                 new FirebaseRecyclerOptions.Builder<SingleChat>()
                         .setQuery(mFirebaseDatabaseReference, parser)
@@ -102,6 +107,8 @@ public class ChatList extends AppCompatActivity {
                                             int position,
                                             SingleChat singleChat) {
                     viewHolder.messageTextView.setText(singleChat.getLastMessage());
+                    viewHolder.messengerTextView.setText(singleChat.getName());
+                    email_to_id.put(singleChat.getName(), singleChat.getId());
            }
         };
 
@@ -126,4 +133,26 @@ public class ChatList extends AppCompatActivity {
         mMessageRecyclerView.setAdapter(mFirebaseAdapter);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onPause() {
+        mFirebaseAdapter.stopListening();
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mFirebaseAdapter.startListening();
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 }

@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.SquareCap;
+import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,10 +79,11 @@ public class CustomerCall extends AppCompatActivity {
             public void onClick(View view) {
                 if(!TextUtils.isEmpty(customerId))
                     cancelBooking(customerId);
-                                         }});
+            }});
         btnAccept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                acceptBooking(customerId);
                 Intent intent = new Intent(CustomerCall.this,DriverTracking.class);
                 //Send customer location to new activity
                 intent.putExtra("lat",lat);
@@ -103,6 +105,29 @@ public class CustomerCall extends AppCompatActivity {
         }
 
         getDirection(lat, lng);
+    }
+
+    private void acceptBooking(String customerId)
+    {
+        Token token = new Token(customerId);
+
+        Notification notification = new Notification("Accepted","User '" +
+                FirebaseAuth.getInstance().getCurrentUser().getEmail() + "' has accepted your request");
+        Sender sender = new Sender(token.getToken(),notification);
+        mFCMService.sendMessage(sender)
+                .enqueue(new Callback<FCMResponse>() {
+                    @Override
+                    public void onResponse(Call<FCMResponse> call, Response<FCMResponse> response) {
+                        Toast.makeText(CustomerCall.this,"Accepted",Toast.LENGTH_SHORT).show();
+                        finish();
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<FCMResponse> call, Throwable t) {
+
+                    }
+                });
     }
 
     private void cancelBooking(String customerId) {
@@ -134,7 +159,7 @@ public class CustomerCall extends AppCompatActivity {
                     "mode=driving&" +
                     "transit_routing_preference=less_driving&" +
                     "origin=" + Common.mLastLocation.getLatitude() + "," + Common.mLastLocation.getLongitude() + "&" +
-                    "destination=" + lat + lng + "&" +
+                    "destination=" + lat + "," + lng + "&" +
                     "key=" + getResources().getString(R.string.google_direction_api);
             Log.d("EDMTDEV", requestApi); // print URL for debug
             mService.getPath(requestApi)
@@ -152,18 +177,18 @@ public class CustomerCall extends AppCompatActivity {
                                 JSONArray legs = object.getJSONArray("legs");
 
                                 //and get first element of legs array
-                                JSONObject legObject = legs.getJSONObject(0);
+                                JSONObject legsObject = legs.getJSONObject(0);
 
                                 //Now, get Distance
-                                JSONObject distance = legObject.getJSONObject("distance");
+                                JSONObject distance = legsObject.getJSONObject("distance");
                                 txtDistance.setText(distance.getString("text"));
 
                                 //getTime
-                                JSONObject time = legObject.getJSONObject("duration");
+                                JSONObject time = legsObject.getJSONObject("duration");
                                 txtTime.setText(time.getString("text"));
 
                                 //getAddress
-                                String address = legObject.getString("end_address");
+                                String address = legsObject.getString("end_address");
                                 txtAddress.setText(address);
 
 

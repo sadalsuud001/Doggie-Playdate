@@ -3,6 +3,7 @@ package com.example.xin.pre_project.Fragments;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -25,6 +26,7 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.example.xin.pre_project.Dog;
+import com.example.xin.pre_project.HomeActivity;
 import com.example.xin.pre_project.ImageManager;
 import com.example.xin.pre_project.R;
 import com.example.xin.pre_project.SQLiteManager;
@@ -41,6 +43,8 @@ import java.io.IOException;
 import java.util.Calendar;
 
 public class AddDogFragment extends android.support.v4.app.Fragment {
+
+    ReturnToProfile mCallback;
 
     EditText addDogEditName, addDogBreed;
 
@@ -63,7 +67,7 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
 
     String name, breed;
     int gender, year, month, day;
-    String userName = "";
+    String userName;
 
     Button addDog;
 
@@ -84,14 +88,34 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_dog, container, false);
         bindViews(view);
-
+        Bundle bd = getArguments();
+        if(bd != null) {
+            userName = bd.getString("username");
+        }
+        else {
+            getUserName();
+        }
 
         return view;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof AddDogFragment.ReturnToProfile) {
+            mCallback = (AddDogFragment.ReturnToProfile) context;
+        }
+        else {
+            throw new RuntimeException(context.toString()
+                    + " must implement MadeMealListener and/or ScheduleMealListener");
+        }
     }
 
     private void bindViews(View view) {
         addDogEditName = view.findViewById(R.id.addDogEditName);
         addDogBreed = view.findViewById(R.id.addDogEditBreed);
+
+        getUserName();
 
         /*
             BIRTHDAY DATE PICKER
@@ -153,13 +177,13 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
         /*
             Dog Pic Choosing
          */
-        dogPic = view.findViewById(R.id.addDogProfilePic);
+        dogPic = view.findViewById(R.id.dogPic);
 
         dogPic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
-                alertDialog.setTitle("Set Dog's Picture");
+                alertDialog.setTitle("Add a picture");
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Take a Picture",
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -186,54 +210,62 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
 
                 name = addDogEditName.getText().toString();
                 breed = addDogBreed.getText().toString();
-                if(name.isEmpty() || breed.isEmpty()) {
+                String bday = chooseBirthday.getText().toString();
+                if(name.isEmpty() || breed.isEmpty() || bday.isEmpty()) {
                     Toast t2 = Toast.makeText(getContext(), "You must fill out all fields", Toast.LENGTH_SHORT);
                     t2.setGravity(Gravity.CENTER, 0,0);
                     t2.show();
                 }
                 else {
-                    Dog newDog = new Dog(name, breed, genderSelectedRadioId, sizeSelectedRadioId, year, month, day);
-                    SQLiteManager db = new SQLiteManager(getContext());
+                    // save dog photo to local storage
+                    ImageManager im = new ImageManager(HomeActivity.gContext, userName);
+                    Bitmap dogBitmap = ((BitmapDrawable)dogPic.getDrawable()).getBitmap();
+                    picPath = im.saveToInternalStorage(dogBitmap, name);
 
-                    // get user's name
-                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                    if(user != null) {
-                        String uid = user.getUid();
-                        String email = user.getEmail();
+                    Dog newDog = new Dog(name, breed, genderSelectedRadioId, sizeSelectedRadioId, year, month, day, picPath);
+                    SQLiteManager db = new SQLiteManager(getContext(), userName);
+                    int result = (int)db.addDog(newDog);
 
-                        /*
-                            TODO: get user's name from Firebase
-                         */
-                        DatabaseReference fb = FirebaseDatabase.getInstance().getReference().child("UsersInformation").child(uid);
-                        fb.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                String s = dataSnapshot.child("name").getValue(String.class);
-                                Log.d("TAG", s);
-                                setUserName(s);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
-
-                        switch((int)db.addDog(userName, newDog)) {
-                            case -1: Toast t = Toast.makeText(getContext(), "Error adding " + name + " to Dogs List", Toast.LENGTH_SHORT);
-                                t.setGravity(Gravity.CENTER, 0,0);
-                                t.show();
-                                break;
-                            default: Toast t1 = Toast.makeText(getContext(), "Added " + name + " to Dogs List", Toast.LENGTH_SHORT);
-                                t1.setGravity(Gravity.CENTER, 0,0);
-                                t1.show();
-                                break;
-                        }
+                    switch(result) {
+                        case -1: Toast t = Toast.makeText(getContext(), "Error adding " + name + " to Dogs List", Toast.LENGTH_SHORT);
+                            t.setGravity(Gravity.CENTER, 0,0);
+                            t.show();
+                            break;
+                        default: Toast t1 = Toast.makeText(getContext(), "Added " + name + " to Dogs List", Toast.LENGTH_SHORT);
+                            t1.setGravity(Gravity.CENTER, 0,0);
+                            t1.show();
+                            break;
                     }
+                    mCallback.navToProfile();
                 }
 
             }
         });
+    }
+
+    private void getUserName() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null) {
+            final String uid = user.getUid();
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("UsersInformation");
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                        if (ds.getKey().equals(uid)) {
+                            String name = ds.child("name").getValue(String.class);
+                            setUserName(name);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     private void setUserName(String name) {
@@ -272,12 +304,7 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
             photo = (Bitmap) data.getExtras().get("data");
             dogPic.setImageBitmap(photo);
 
-            // save dog photo to local storage
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) dogPic.getDrawable();
-            Bitmap bitmap = bitmapDrawable.getBitmap();
-            ImageManager im = new ImageManager(getContext());
-            picPath = im.saveToInternalStorage(bitmap, dogName);
-            dogPic.setImageDrawable(null);
+
         }
 
         if(requestCode == GALLERY_REQUEST && resultCode == Activity.RESULT_OK) {
@@ -286,12 +313,6 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
                 photo = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
                 dogPic.setImageBitmap(photo);
 
-              // save dog photo to local storage
-                BitmapDrawable bitmapDrawable = (BitmapDrawable) dogPic.getDrawable();
-                Bitmap bitmap = bitmapDrawable.getBitmap();
-                ImageManager im = new ImageManager(getContext());
-                picPath = im.saveToInternalStorage(bitmap, dogName);
-                dogPic.setImageDrawable(null);
               
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
@@ -301,5 +322,9 @@ public class AddDogFragment extends android.support.v4.app.Fragment {
                 e.printStackTrace();
             }
         }
+    }
+
+    public interface ReturnToProfile {
+        void navToProfile();
     }
 }

@@ -45,9 +45,7 @@ public class PlaydatesAdapter extends ArrayAdapter<Playdate> {
         String usersString = "";
         Playdate p = data.get(position);
         if(p != null) {
-            for(int x = 0; x < p.attendees.size(); x++) {
-                usersString += p.attendees.get(x) + "\n";
-            }
+            usersString = "You, " + p.user2.name;
             usersList.setText(usersString);
 
             final TextView location = v.findViewById(R.id.playdateLocation);
@@ -55,20 +53,20 @@ public class PlaydatesAdapter extends ArrayAdapter<Playdate> {
 
             if(Geocoder.isPresent()) {
                 // convert location to address
-                String[] address = locationFromLatLon(p.meetingPlace.getLatitude(), p.meetingPlace.getLongitude());
+                String[] address = locationFromLatLon(p.latitude, p.longitude);
                 if(address != null) {
                     String addressString = "";
-                    addressString += address[0] + "\n";
+                    addressString += address[0];
                     //addressString += address[1] + ", " + address[2] + " " + address[3];
                     location.setText(addressString);
                 }
                 else
-                    location.setText("Lat: " + data.get(position).meetingPlace.getLatitude() + "\n" + "Lon: " +
-                            data.get(position).meetingPlace.getLongitude());
+                    location.setText("Lat: " + data.get(position).latitude + "\n" + "Lon: " +
+                            data.get(position).longitude);
             }
             else {
-                location.setText("Lat: " + data.get(position).meetingPlace.getLatitude() + "\n" + "Lon: " +
-                                                    data.get(position).meetingPlace.getLongitude());
+                location.setText("Lat: " + data.get(position).latitude + "\n" + "Lon: " +
+                                                    data.get(position).longitude);
             }
 
             dateTime.setText(p.dToString());

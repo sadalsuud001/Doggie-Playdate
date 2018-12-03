@@ -7,15 +7,19 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class Playdate {
-    public ArrayList<String> attendees;     // user emails
-    public Date date;   // (yr, month, date, hrs, mins)
-    public Location meetingPlace;   // Location.getLatitude, getLongitude
+    public PDAttendee user1, user2;
+    public Date date;   // yyyy-MM-dd HH:mm
+    public float latitude, longitude;
 
-    public Playdate(ArrayList<String> attendees, Date date, Location meetingPlace) {
-        this.attendees = attendees;
-        this.date = date;
-        this.meetingPlace = meetingPlace;
+    public Playdate(PDAttendee u1, PDAttendee u2, Date dt, float lat, float lon) {
+        this.user1 = u1;
+        this.user2 = u2;
+        this.date = dt;
+        this.latitude = lat;
+        this.longitude = lon;
     }
+
+
 
     public String dateToDBString() {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -26,5 +30,4 @@ public class Playdate {
         SimpleDateFormat format = new SimpleDateFormat("E MMM d, y  HH:mm");
         return format.format(date);
     }
-
 }

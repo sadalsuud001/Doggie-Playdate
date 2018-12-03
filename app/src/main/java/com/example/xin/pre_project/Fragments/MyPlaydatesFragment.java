@@ -7,16 +7,25 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.example.xin.pre_project.PDAttendee;
 import com.example.xin.pre_project.Playdate;
 import com.example.xin.pre_project.PlaydatesAdapter;
 import com.example.xin.pre_project.R;
 import com.example.xin.pre_project.SQLiteManager;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,6 +39,7 @@ public class MyPlaydatesFragment extends Fragment {
     FloatingActionButton fabAddPlaydate;
 
     ArrayAdapter<Playdate> adapter;
+    String myUID, userName;
 
     PlaydateListener mCallback;
 
@@ -43,13 +53,20 @@ public class MyPlaydatesFragment extends Fragment {
         if (getArguments() != null) {
 
         }
+        getUserName();
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_myplaydates, container, false);
+        Bundle bd = getArguments();
+        if(bd != null) {
+            userName = bd.getString("username");
+        }
         bindViews(view);
+
+        //getUserName();
         setAndAttachLVAdapter();
 
         return view;
@@ -70,65 +87,56 @@ public class MyPlaydatesFragment extends Fragment {
         ArrayList<Playdate> myPlaydates = new ArrayList<>();
         ArrayList<String> attendees = new ArrayList<>();
 
-        SQLiteManager dbManager = new SQLiteManager(getContext());
+        SQLiteManager dbManager = new SQLiteManager(getContext(), userName);
         // get Playdates for days >= today
         Date todaysDate = Calendar.getInstance().getTime();
         SimpleDateFormat myFormat1 = new SimpleDateFormat("yyyy-MM-dd");
         String todaysString = myFormat1.format(todaysDate);
 
-        Cursor cursor = dbManager.getPlaydatesAfter(todaysString);
+        /*
+        //Cursor cursor = dbManager.getPlaydatesAfter(todaysString);
+        Cursor cursor = dbManager.getAllPlaydates();
         if(cursor != null) {
             if(cursor.moveToFirst()) {
-                int x = 1;
-
                 do {
-                    attendees = new ArrayList<>();
-                    // get individual Playdate table, create playdates list
-                    Cursor pdCursor = dbManager.getSinglePlaydate(x);
-                    if(pdCursor != null) {
-                        if (pdCursor.moveToFirst()) {
-                            do {
-                                attendees.add(pdCursor.getString(pdCursor.getColumnIndexOrThrow("user")));
-                            } while (pdCursor.moveToNext());
-
-                            // build Playdate object from table read-in
-                            String dateString = cursor.getString(cursor.getColumnIndexOrThrow("date"));
-                            SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                            Date date = new Date();
-                            try {
-                                date = myFormat.parse(dateString);
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
-                            double lat = cursor.getDouble(cursor.getColumnIndexOrThrow("latitude"));
-                            double lon = cursor.getDouble(cursor.getColumnIndexOrThrow("longitude"));
-                            Location loc = new Location("");
-                            loc.setLatitude(lat);
-                            loc.setLongitude(lon);
-                            Playdate pd = new Playdate(attendees, date, loc);
-                            myPlaydates.add(pd);
-                            x++;
-                        }
+                    Log.d("mypd", "cursor not null");
+                    String user2uid = cursor.getString(cursor.getColumnIndexOrThrow("user2UID"));
+                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    Date date = new Date();
+                    try {
+                        date = df.parse(cursor.getString(cursor.getColumnIndexOrThrow("date")));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
-                } while(cursor.moveToNext());
+                    Log.d("mypd", "cursor not null2");
+                    float latitude = cursor.getFloat(cursor.getColumnIndexOrThrow("latitude"));
+                    float longitude = cursor.getFloat(cursor.getColumnIndexOrThrow("longitude"));
+                    myPlaydates.add(new Playdate(new PDAttendee(myUID), new PDAttendee(user2uid), date, latitude, longitude));
+                    Log.d("mypd", "cursor not null3");
+                } while (cursor.moveToNext());
             }
+
         }
         else {
             /*
             FOR DATE:
                 month is 0 indexed  - 0 = January
                 year is 1900 as base - For 2016, input 116 for year
-            */
+
             attendees.add("abc");
             attendees.add("def");
             Date date = new Date(118, 1, 1, 15, 30);
             Location meetingPlace = new Location("");
             meetingPlace.setLatitude(37.3382);
             meetingPlace.setLongitude(-121.8863);
-            myPlaydates.add(new Playdate(attendees, date, meetingPlace));
+            //myPlaydates.add(new Playdate(attendees, date, meetingPlace));
             date = new Date(118, 11, 30, 8, 15);
-            myPlaydates.add(new Playdate(attendees, date, meetingPlace));
+            //myPlaydates.add(new Playdate(attendees, date, meetingPlace));
+
+            Log.d("mypd", "cursor IS null");
         }
+        */
+        myPlaydates = dbManager.getAllPlaydates();
 
 
         adapter = new PlaydatesAdapter(getActivity(), myPlaydates);
@@ -151,6 +159,35 @@ public class MyPlaydatesFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mCallback = null;
+    }
+
+    private void getUserName() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        myUID = user.getUid();
+        if(user != null) {
+            final String uid = user.getUid();
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("UsersInformation");
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                        if (ds.getKey().equals(uid)) {
+                            String name = ds.child("name").getValue(String.class);
+                            setUserName(name);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+    private void setUserName(String name) {
+        userName = name;
     }
 
     public interface PlaydateListener {

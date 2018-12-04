@@ -19,22 +19,20 @@ We will put more views like: list of users...
         android:layout_height="wrap_content">
 
         <TextView
-            android:text="User1"
+            android:text="TestC"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:text="TestAAA"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <TextView
             android:layout_marginTop="10dp"
-            android:text="User2"
+            android:text="TestD"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_marginTop="10dp"
-            android:text="User3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
 
     </LinearLayout>
 

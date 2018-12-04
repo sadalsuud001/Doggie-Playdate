@@ -160,17 +160,19 @@ public class HomeActivity extends AppCompatActivity
             userName = b.getString("username", "");
             switch (navItemIndex) {
                 case 1:
-                    CURRENT_TAG = TAG_MESSAGING;
-                    selectNavMenu(navItemIndex);
-                    setToolbarTitle(1);
-                    fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
-                    if (fragment == null) {
-                        fragment = new MessagingFragment();
-                        b = new Bundle();
-                        b.putString("username", userName);
-                        fragment.setArguments(b);
-                    }
-                    navToFragment(fragment);
+//                    CURRENT_TAG = TAG_MESSAGING;
+//                    selectNavMenu(navItemIndex);
+//                    setToolbarTitle(1);
+//                    fragment = getSupportFragmentManager().findFragmentByTag(CURRENT_TAG);
+//                    if (fragment == null) {
+//                        fragment = new MessagingFragment();
+//                        b = new Bundle();
+//                        b.putString("username", userName);
+//                        fragment.setArguments(b);
+//                    }
+//                    navToFragment(fragment);
+                    Intent intent = new Intent(HomeActivity.this, ChatList.class);
+                    startActivity(intent);
                     break;
                 case 2:
                     CURRENT_TAG = TAG_CREATEPLAYDATE;

@@ -27,6 +27,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,6 +51,7 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.firebase.ui.database.SnapshotParser;
 import com.github.glomadrian.materialanimatedswitch.MaterialAnimatedSwitch;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -113,6 +115,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
         com.google.android.gms.location.LocationListener  {
 
     private Map<Marker, String> user_marker_to_email_address = new HashMap<Marker, String>();
+    private Map<Marker, User> user_marker_to_name = new HashMap<Marker, User>();
     private String selected_user_email;
 
     //message part variables init
@@ -960,6 +963,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
                                     .snippet("Phone: " + user.getPhone())
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.dog)));
                             user_marker_to_email_address.put(marker, dataSnapshot.getKey());
+                            user_marker_to_name.put(marker, user);
                         }
 
                     }
@@ -1119,6 +1123,13 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,
     public boolean onMarkerClick (Marker marker) {
         if (user_marker_to_email_address.get(marker) != null) {
             selected_user_email = user_marker_to_email_address.get(marker);
+
+            //ToDo: query UsersInformation table and get the selected_user_name and toast it
+            User user = user_marker_to_name.get(marker);
+            Toast t = Toast.makeText(this, "User Name is: " + user.getName() + "\nEmail name is: " + user.getEmail(), Toast.LENGTH_SHORT);
+            t.setGravity(Gravity.CENTER, 0, -20);
+            t.show();
+
             Log.d("aaa", selected_user_email);
         }
         return true;
